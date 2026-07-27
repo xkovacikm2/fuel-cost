@@ -11,7 +11,7 @@ rails:
       cpu: 500m
       memory: 512Mi
     requests:
-      cpu: 250m
+      cpu: 100m
       memory: 256Mi
 
   # Rails environment
@@ -44,7 +44,7 @@ postgresql:
       cpu: 500m
       memory: 512Mi
     requests:
-      cpu: 250m
+      cpu: 100m
       memory: 256Mi
 
 # Ingress configuration (Traefik IngressRoute CRD)

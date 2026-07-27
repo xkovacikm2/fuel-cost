@@ -37,13 +37,11 @@ spec:
             - configMapRef:
                 name: {{ include "spotreba.fullname" . }}
           env:
-            - name: POSTGRES_PASSWORD
+            - name: SPOTREBA_DATABASE_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: {{ include "spotreba.fullname" . }}
                   key: postgres-password
-            - name: DATABASE_URL
-              value: {{ include "spotreba.databaseUrl" . | quote }}
             - name: SECRET_KEY_BASE
               valueFrom:
                 secretKeyRef:
@@ -61,13 +59,11 @@ spec:
             - configMapRef:
                 name: {{ include "spotreba.fullname" . }}
           env:
-            - name: POSTGRES_PASSWORD
+            - name: SPOTREBA_DATABASE_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: {{ include "spotreba.fullname" . }}
                   key: postgres-password
-            - name: DATABASE_URL
-              value: {{ include "spotreba.databaseUrl" . | quote }}
             - name: SECRET_KEY_BASE
               valueFrom:
                 secretKeyRef:
