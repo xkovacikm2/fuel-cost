@@ -3,7 +3,10 @@
   "dockerComposeFile": "docker-compose.yml",
   "service": "app",
   "workspaceFolder": "/workspace/spotreba",
-  
+  "mounts": [
+    "source=${localEnv:HOME}${localEnv:USERPROFILE}/.ssh,target=/home/vscode/.ssh-copy,type=bind,readonly",
+    "source=${localEnv:HOME}${localEnv:USERPROFILE}/.gitconfig,target=/home/vscode/.gitconfig-copy,type=bind,readonly"
+  ],
   "customizations": {
     "vscode": {
       "extensions": [
@@ -15,10 +18,14 @@
       ]
     }
   },
-
-  "forwardPorts": [3000, 5432],
-
-  "postCreateCommand": "bundle install && rails db:create db:migrate",
-
+  "forwardPorts": [
+    3000,
+    5432
+  ],
+  "postCreateCommand": {
+    "initRails": "bundle install && rails db:create db:migrate",
+    "moveSsh": "mkdir -p /home/vscode/.ssh; cp /home/vscode/.ssh-copy/* /home/vscode/.ssh/ 2>/dev/null || true; chmod 600 /home/vscode/.ssh/* 2>/dev/null || true",
+    "gitconfigPermission": "cp /home/vscode/.gitconfig-copy /home/vscode/.gitconfig 2>/dev/null || true; chown vscode:vscode /home/vscode/.gitconfig 2>/dev/null || true"
+  },
   "remoteUser": "vscode"
 }
