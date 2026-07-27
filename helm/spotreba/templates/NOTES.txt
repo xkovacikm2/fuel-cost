@@ -1,0 +1,15 @@
+Spotreba Fuel Tracker has been deployed!
+
+Get the application URL by running:
+  kubectl port-forward svc/{{ include "spotreba.fullname" . }} 3000:{{ .Values.service.port }}
+  Then visit: http://localhost:3000
+
+To check the status of your pods:
+  kubectl get pods -l app.kubernetes.io/instance={{ .Release.Name }}
+
+To view logs:
+  kubectl logs -l app.kubernetes.io/instance={{ .Release.Name }},app.kubernetes.io/component=web
+  kubectl logs -l app.kubernetes.io/instance={{ .Release.Name }},app.kubernetes.io/component=worker
+
+To open a Rails console in the running pod:
+  kubectl exec -it deploy/{{ include "spotreba.fullname" . }} -- bin/rails console

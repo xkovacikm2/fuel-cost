@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title><%= content_for(:title) || "Spotreba" %></title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="application-name" content="Spotreba">
+    <meta name="mobile-web-app-capable" content="yes">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+
+    <%= yield :head %>
+
+    <%= tag.link rel: "manifest", href: pwa_manifest_path(format: :json) %>
+    <meta name="theme-color" content="#0b3d91">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js" defer></script>
+    <script>
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", () => {
+          navigator.serviceWorker.register("<%= pwa_service_worker_path %>")
+        })
+      }
+    </script>
+
+    <link rel="icon" href="/icon.png" type="image/png">
+    <link rel="icon" href="/icon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/icon.png">
+
+    <%# Includes all stylesheet files in app/assets/stylesheets %>
+    <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
+    <%= javascript_importmap_tags %>
+  </head>
+
+  <body>
+    <header class="topbar">
+      <div class="container topbar-inner">
+        <h1 class="brand"><%= link_to "Spotreba", root_path %></h1>
+        <% if authenticated? %>
+          <nav class="main-nav">
+            <%= link_to "Prehľad", root_path %>
+            <%= link_to "Nové tankovanie", new_refueling_path %>
+            <%= link_to "Vozidlá", vehicles_path %>
+            <%= button_to "Odhlásiť sa", session_path, method: :delete, class: "link-button" %>
+          </nav>
+        <% else %>
+          <nav class="main-nav">
+            <%= link_to "Prihlásiť sa", new_session_path %>
+            <%= link_to "Vytvoriť účet", sign_up_path %>
+          </nav>
+        <% end %>
+      </div>
+    </header>
+
+    <main class="container page">
+      <% if flash[:notice] %>
+        <p class="flash flash-notice"><%= flash[:notice] %></p>
+      <% end %>
+      <% if flash[:alert] %>
+        <p class="flash flash-alert"><%= flash[:alert] %></p>
+      <% end %>
+
+      <%= yield %>
+    </main>
+  </body>
+</html>

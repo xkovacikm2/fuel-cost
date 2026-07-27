@@ -1,0 +1,50 @@
+<%= form_with(model: refueling) do |form| %>
+  <% if refueling.errors.any? %>
+    <div class="errors">
+      <h2>Toto tankovanie sa nepodarilo uložiť:</h2>
+
+      <ul>
+        <% refueling.errors.each do |error| %>
+          <li><%= error.full_message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <section data-controller="refueling-form" data-refueling-form-units-value="<%= json_escape(@vehicle_units.to_json) %>">
+    <div class="field">
+      <%= form.label :vehicle_id, "Vozidlo" %>
+      <%= form.collection_select :vehicle_id, @vehicles, :id, :name, {}, { data: { action: "change->refueling-form#vehicleChanged", refueling_form_target: "vehicle" } } %>
+    </div>
+
+    <div class="field">
+      <label>Jednotka</label>
+      <p data-refueling-form-target="unit" class="muted"><%= refueling.vehicle&.unit || @vehicles.first&.unit %></p>
+    </div>
+
+    <div class="field">
+      <%= form.label :refueled_on, "Dátum tankovania" %>
+      <%= form.date_field :refueled_on %>
+    </div>
+
+    <div class="field">
+      <%= form.label :distance_km, "Vzdialenosť od posledného tankovania (km)" %>
+      <%= form.number_field :distance_km, step: 0.01, min: 0.01 %>
+    </div>
+
+    <div class="field">
+      <%= form.label :amount, "Množstvo paliva do plnej nádrže" %>
+      <%= form.number_field :amount, step: 0.01, min: 0.01 %>
+    </div>
+
+    <div class="field">
+      <%= form.label :cost, "Náklady na palivo" %>
+      <%= form.number_field :cost, step: 0.01, min: 0.01 %>
+    </div>
+
+    <div class="actions">
+	    <%= form.submit "Uložiť" %>
+	    <%= link_to "Späť", root_path, class: "button secondary" %>
+    </div>
+  </section>
+<% end %>

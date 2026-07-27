@@ -1,0 +1,13 @@
+{{- if .Values.webEndpoint.enabled }}
+apiVersion: apps.kovko.top/v1alpha1
+kind: WebEndpoint
+metadata:
+  name: {{ printf "%s-webendpoint" (include "spotreba.fullname" .) | trunc 63 | trimSuffix "-" }}
+  labels:
+    {{- include "spotreba.labels" . | nindent 4 }}
+spec:
+  name: {{ required "webEndpoint.name is required" .Values.webEndpoint.name | quote }}
+  description: {{ required "webEndpoint.description is required" .Values.webEndpoint.description | quote }}
+  url: {{ required "webEndpoint.url is required" .Values.webEndpoint.url | quote }}
+  icon: {{ required "webEndpoint.icon is required" .Values.webEndpoint.icon | quote }}
+{{- end }}

@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "spotreba.fullname" . }}
+  labels:
+    {{- include "spotreba.labels" . | nindent 4 }}
+data:
+  RAILS_ENV: {{ .Values.rails.railsEnv | quote }}
+  RAILS_LOG_TO_STDOUT: "true"
+  RAILS_SERVE_STATIC_FILES: "true"
+  HTTP_PORT: "3000"
+  POSTGRES_HOST: {{ include "spotreba.postgresqlHost" . | quote }}
+  POSTGRES_PORT: "5432"
+  POSTGRES_DB: {{ .Values.postgresql.auth.database | quote }}
+  POSTGRES_USER: {{ .Values.postgresql.auth.username | quote }}

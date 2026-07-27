@@ -1,0 +1,14 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Rails Server",
+      "type": "rdbg",
+      "request": "launch",
+      "script": "bin/rails server",
+      "args": [],
+      "askParameters": false,
+      "cwd": "${workspaceFolder}"
+    }
+  ]
+}

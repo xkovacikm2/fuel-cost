@@ -1,0 +1,37 @@
+<% content_for :title, "Vozidlá" %>
+
+<section class="card">
+  <div class="actions" style="justify-content: space-between; align-items: center;">
+      <h2 style="margin: 0;">Vozidlá</h2>
+      <%= link_to "Nové vozidlo", new_vehicle_path, class: "button" %>
+  </div>
+
+  <% if @vehicles.empty? %>
+      <p class="muted">Zatiaľ žiadne vozidlá.</p>
+  <% else %>
+    <table>
+      <thead>
+        <tr>
+            <th>Názov</th>
+            <th>Typ paliva</th>
+            <th>Jednotka</th>
+            <th>Akcie</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @vehicles.each do |vehicle| %>
+          <tr>
+            <td><%= vehicle.name %></td>
+              <td><%= vehicle.fuel_type_label %></td>
+            <td><%= vehicle.unit %></td>
+            <td class="actions">
+                <%= link_to "Zobraziť", vehicle, class: "button secondary" %>
+                <%= link_to "Upraviť", edit_vehicle_path(vehicle), class: "button secondary" %>
+                <%= button_to "Vymazať", vehicle, method: :delete, class: "danger", form: { data: { turbo_confirm: "Vymazať toto vozidlo a všetky súvisiace tankovania?" } } %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  <% end %>
+</section>

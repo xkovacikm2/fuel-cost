@@ -1,0 +1,142 @@
+<% content_for :title, "Prehľad" %>
+<section class="card">
+	<h3><%= @chart_payload[:title] %></h3>
+	<% if @chart_payload[:labels].empty? %>
+		<p class="muted">V tomto období nie sú žiadne údaje o tankovaní.</p>
+	<% else %>
+		<div class="chart-wrap" data-controller="chart" data-chart-payload-value="<%= json_escape(@chart_payload.to_json) %>">
+			<canvas data-chart-target="canvas" aria-label="Graf spotreby paliva"></canvas>
+		</div>
+	<% end %>
+</section>
+
+<section class="grid grid-4">
+	<article class="card">
+		<h3>Dni od posledného tankovania</h3>
+		<p class="stat"><%= @days_since_last_refueling || "—" %></p>
+	</article>
+
+	<article class="card">
+		<h3>Priemerná spotreba / 100 km</h3>
+		<p class="stat"><%= @average_consumption_per_100km ? number_with_precision(@average_consumption_per_100km, precision: 1) : "—" %></p>
+	</article>
+
+	<article class="card">
+		<h3>Celkové palivo / celkové náklady</h3>
+		<p class="stat"><%= number_with_precision(@total_fuel_refilled, precision: 2) %> <%= @scope == "combined" ? "zmiešané jednotky" : (@selected_vehicle&.unit || "L") %> / <%= number_to_currency(@total_cost_paid, unit: "€", format: "%n %u", precision: 2) %></p>
+	</article>
+
+	<article class="card">
+		<h3>Priemerný počet dní medzi tankovaniami</h3>
+		<p class="stat"><%= @average_days_between ? number_with_precision(@average_days_between, precision: 1) : "—" %></p>
+	</article>
+</section>
+
+<section class="card">
+	<div class="actions" style="justify-content: space-between; align-items: center;">
+		<h3 style="margin: 0;">Záznamy tankovaní</h3>
+			<%= link_to new_refueling_path, class: "icon-button", aria: { label: "Pridať tankovanie" }, title: "Pridať tankovanie" do %>
+					<%= image_tag "/icons/plus.svg", alt: "", aria: { hidden: true } %>
+				<span class="sr-only">Pridať tankovanie</span>
+			<% end %>
+	</div>
+
+	<% if @table_refuelings.empty? %>
+		<p class="muted">Zatiaľ tu nie sú žiadne záznamy tankovaní.</p>
+	<% else %>
+		<table>
+			<thead>
+				<tr>
+					<th>Dátum</th>
+					<th>Vozidlo</th>
+					<th>Vzdialenosť (km)</th>
+					<th>Množstvo</th>
+					<th>Náklady</th>
+					<th>Spotreba / 100 km</th>
+					<th>Náklady / 100 km</th>
+					<th>Akcie</th>
+				</tr>
+			</thead>
+			<tbody>
+				<% @table_refuelings.each do |refueling| %>
+					<tr>
+						<td><%= refueling.refueled_on %></td>
+						<td><%= refueling.vehicle.name %></td>
+						<td><%= number_with_precision(refueling.distance_km, precision: 2) %></td>
+						<td><%= number_with_precision(refueling.amount, precision: 2) %> <%= refueling.vehicle.unit %></td>
+						<td><%= number_with_precision(refueling.cost, precision: 2) %></td>
+						<td><%= number_with_precision(refueling.consumption_per_100km, precision: 2) %></td>
+						<td><%= number_with_precision(refueling.cost_per_100km, precision: 2) %></td>
+						<td class="actions">
+							<%= link_to edit_refueling_path(refueling), class: "icon-button secondary", aria: { label: "Upraviť tankovanie" }, title: "Upraviť tankovanie" do %>
+								<%= image_tag "/icons/edit.svg", alt: "", aria: { hidden: true } %>
+								<span class="sr-only">Upraviť tankovanie</span>
+							<% end %>
+							<%= button_to refueling_path(refueling), method: :delete, class: "icon-button danger", form: { data: { turbo_confirm: "Vymazať tento záznam tankovania?" } }, title: "Vymazať tankovanie", aria: { label: "Vymazať tankovanie" } do %>
+								<%= image_tag "/icons/trash.svg", alt: "", aria: { hidden: true } %>
+								<span class="sr-only">Vymazať tankovanie</span>
+							<% end %>
+						</td>
+					</tr>
+				<% end %>
+			</tbody>
+		</table>
+
+		<div class="actions" style="justify-content: space-between; align-items: center; margin-top: .75rem;">
+			<p class="muted" style="margin: 0;">
+					Zobrazuje sa <%= @table_refuelings.size %> z <%= @table_total_count %> záznamov
+			</p>
+			<div class="actions">
+				<% if @table_page > 1 %>
+						<%= link_to root_path(scope: @scope, vehicle_id: @selected_vehicle&.id, offset: @offset_days, table_page: @table_page - 1), class: "icon-button secondary", aria: { label: "Predchádzajúca strana" }, title: "Predchádzajúca strana" do %>
+						<%= image_tag "/icons/chevron-left.svg", alt: "", aria: { hidden: true } %>
+							<span class="sr-only">Predchádzajúca strana</span>
+					<% end %>
+				<% end %>
+					<span class="muted">Strana <%= @table_page %> / <%= @table_total_pages %></span>
+				<% if @table_page < @table_total_pages %>
+						<%= link_to root_path(scope: @scope, vehicle_id: @selected_vehicle&.id, offset: @offset_days, table_page: @table_page + 1), class: "icon-button secondary", aria: { label: "Nasledujúca strana" }, title: "Nasledujúca strana" do %>
+						<%= image_tag "/icons/chevron-right.svg", alt: "", aria: { hidden: true } %>
+							<span class="sr-only">Nasledujúca strana</span>
+					<% end %>
+				<% end %>
+			</div>
+		</div>
+	<% end %>
+</section>
+
+<section class="card">
+	<h2>Prehľad spotreby paliva</h2>
+	<p class="muted">Priemerná spotreba a náklady na 100 km za vybrané 365-dňové obdobie.</p>
+
+	<%= form_with url: root_path, method: :get, local: true do |form| %>
+		<%= form.hidden_field :offset, value: @offset_days %>
+
+		<div class="grid grid-3">
+			<div class="field">
+				<%= form.label :scope, "Rozsah grafu" %>
+				<%= form.select :scope, options_for_select([["Podľa vozidla", "vehicle"], ["Spolu", "combined"]], @scope) %>
+			</div>
+
+			<div class="field">
+				<%= form.label :vehicle_id, "Vozidlo (v režime podľa vozidla)" %>
+				<%= form.select :vehicle_id,
+							options_from_collection_for_select(@vehicles, :id, :name, @selected_vehicle&.id),
+							{ include_blank: @vehicles.any? ? false : "Zatiaľ žiadne vozidlá" },
+							disabled: @vehicles.empty? %>
+			</div>
+
+			<div class="field actions" style="align-items: end;">
+				<%= form.submit "Použiť" %>
+			</div>
+		</div>
+	<% end %>
+
+	<div class="actions" style="margin-top: .6rem;">
+		<%= link_to "Predchádzajúcich 365 dní", root_path(scope: @scope, vehicle_id: @selected_vehicle&.id, offset: @offset_days + 365), class: "button secondary" %>
+		<% if @offset_days.positive? %>
+			<%= link_to "Nasledujúcich 365 dní", root_path(scope: @scope, vehicle_id: @selected_vehicle&.id, offset: [@offset_days - 365, 0].max), class: "button secondary" %>
+		<% end %>
+	</div>
+</section>
+

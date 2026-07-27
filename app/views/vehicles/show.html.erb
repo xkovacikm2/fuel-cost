@@ -1,0 +1,13 @@
+<% content_for :title, @vehicle.name %>
+
+<section class="card">
+  <h2><%= @vehicle.name %></h2>
+  <p><strong>Typ paliva:</strong> <%= @vehicle.fuel_type_label %></p>
+  <p><strong>Jednotka:</strong> <%= @vehicle.unit %></p>
+
+  <div class="actions">
+	    <%= link_to "Upraviť", edit_vehicle_path(@vehicle), class: "button secondary" %>
+	    <%= link_to "Späť", vehicles_path, class: "button secondary" %>
+	    <%= button_to "Vymazať", @vehicle, method: :delete, class: "danger", form: { data: { turbo_confirm: "Vymazať toto vozidlo a všetky súvisiace tankovania?" } } %>
+  </div>
+</section>

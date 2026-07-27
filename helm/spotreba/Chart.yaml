@@ -1,0 +1,6 @@
+apiVersion: v2
+name: spotreba
+description: A Helm chart for Spotreba Fuel Tracker Rails application
+type: application
+version: 0.1.0
+appVersion: "1.0.0"

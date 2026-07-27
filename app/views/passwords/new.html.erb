@@ -1,0 +1,10 @@
+<% content_for :title, "Obnovenie hesla" %>
+
+<h1>Zabudli ste heslo?</h1>
+
+<%= tag.div(flash[:alert], style: "color:red") if flash[:alert] %>
+
+<%= form_with url: passwords_path do |form| %>
+  <%= form.email_field :email_address, required: true, autofocus: true, autocomplete: "username", placeholder: "Zadajte svoju e-mailovú adresu", value: params[:email_address] %><br>
+  <%= form.submit "Odoslať pokyny na obnovenie hesla" %>
+<% end %>

@@ -1,0 +1,27 @@
+<div id="<%= dom_id refueling %>">
+  <div>
+    <strong>Vozidlo:</strong>
+    <%= refueling.vehicle.name %>
+  </div>
+
+  <div>
+    <strong>Dátum tankovania:</strong>
+    <%= refueling.refueled_on %>
+  </div>
+
+  <div>
+    <strong>Vzdialenosť:</strong>
+    <%= number_with_precision(refueling.distance_km, precision: 2) %> km
+  </div>
+
+  <div>
+    <strong>Množstvo:</strong>
+    <%= number_with_precision(refueling.amount, precision: 2) %> <%= refueling.vehicle.unit %>
+  </div>
+
+  <div>
+    <strong>Náklady:</strong>
+    <%= number_to_currency(refueling.cost, unit: "€", format: "%n %u", precision: 2) %>
+  </div>
+
+</div>

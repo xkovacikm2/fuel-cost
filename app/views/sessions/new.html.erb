@@ -1,0 +1,22 @@
+<% content_for :title, "Prihlásenie" %>
+
+<section class="card">
+  <h2>Prihlásiť sa</h2>
+  <%= form_with url: session_path do |form| %>
+    <div class="field">
+      <%= form.label :email_address, "E-mail" %>
+      <%= form.email_field :email_address, required: true, autofocus: true, autocomplete: "username", value: params[:email_address] %>
+    </div>
+
+    <div class="field">
+      <%= form.label :password, "Heslo" %>
+      <%= form.password_field :password, required: true, autocomplete: "current-password", maxlength: 72 %>
+    </div>
+
+    <div class="actions">
+      <%= form.submit "Prihlásiť sa" %>
+      <%= link_to "Vytvoriť účet", sign_up_path, class: "button secondary" %>
+      <%= link_to "Zabudli ste heslo?", new_password_path, class: "button secondary" %>
+    </div>
+  <% end %>
+</section>

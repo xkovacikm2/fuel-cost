@@ -1,0 +1,11 @@
+{
+    "chat.tools.terminal.autoApprove": {
+        "bundle": true,
+        "bin/bundler-audit": true,
+        "/^bin/importmap audit 2>&1; echo \"Exit: \\$\\?\"$/": {
+            "approve": true,
+            "matchCommandLine": true
+        },
+        "bin/rubocop": true
+    }
+}

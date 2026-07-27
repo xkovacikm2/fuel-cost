@@ -1,0 +1,24 @@
+{
+  "name": "Spotreba",
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "app",
+  "workspaceFolder": "/workspace/spotreba",
+  
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "Shopify.ruby-lsp",
+        "bradlc.vscode-tailwindcss",
+        "ms-azuretools.vscode-containers",
+        "cweijan.vscode-database-client2",
+        "KoichiSasada.vscode-rdbg"
+      ]
+    }
+  },
+
+  "forwardPorts": [3000, 5432],
+
+  "postCreateCommand": "bundle install && rails db:create db:migrate",
+
+  "remoteUser": "vscode"
+}

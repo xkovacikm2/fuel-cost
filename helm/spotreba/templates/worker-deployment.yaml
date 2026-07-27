@@ -1,0 +1,56 @@
+{{- if .Values.worker.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "spotreba.fullname" . }}-worker
+  labels:
+    {{- include "spotreba.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.worker.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "spotreba.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: worker
+  template:
+    metadata:
+      labels:
+        {{- include "spotreba.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: worker
+    spec:
+      initContainers:
+        - name: wait-for-postgres
+          image: busybox:1.36
+          command:
+            - sh
+            - -c
+            - |
+              until nc -z {{ include "spotreba.postgresqlHost" . }} 5432; do
+                echo "Waiting for PostgreSQL..."
+                sleep 2
+              done
+      containers:
+        - name: worker
+          image: "{{ .Values.rails.image.repository }}:{{ .Values.rails.image.tag }}"
+          imagePullPolicy: {{ .Values.rails.image.pullPolicy }}
+          command:
+            - bin/rails
+            - solid_queue:start
+          envFrom:
+            - configMapRef:
+                name: {{ include "spotreba.fullname" . }}
+          env:
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "spotreba.fullname" . }}
+                  key: postgres-password
+            - name: DATABASE_URL
+              value: {{ include "spotreba.databaseUrl" . | quote }}
+            - name: SECRET_KEY_BASE
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "spotreba.fullname" . }}
+                  key: rails-secret-key-base
+          resources:
+            {{- toYaml .Values.worker.resources | nindent 12 }}
+{{- end }}
