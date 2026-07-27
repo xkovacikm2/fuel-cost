@@ -65,18 +65,6 @@ service:
   type: ClusterIP
   port: 3000
 
-# Solid Queue worker configuration
-worker:
-  enabled: true
-  replicaCount: 1
-  resources:
-    limits:
-      cpu: 250m
-      memory: 256Mi
-    requests:
-      cpu: 100m
-      memory: 128Mi
-
 # WebEndpoint CRD configuration
 webEndpoint:
   enabled: true
