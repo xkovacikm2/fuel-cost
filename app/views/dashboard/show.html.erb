@@ -60,14 +60,14 @@
 			<tbody>
 				<% @table_refuelings.each do |refueling| %>
 					<tr>
-						<td><%= refueling.refueled_on %></td>
-						<td><%= refueling.vehicle.name %></td>
-						<td><%= number_with_precision(refueling.distance_km, precision: 2) %></td>
-						<td><%= number_with_precision(refueling.amount, precision: 2) %> <%= refueling.vehicle.unit %></td>
-						<td><%= number_with_precision(refueling.cost, precision: 2) %></td>
-						<td><%= number_with_precision(refueling.consumption_per_100km, precision: 2) %></td>
-						<td><%= number_with_precision(refueling.cost_per_100km, precision: 2) %></td>
-						<td class="actions">
+						<td data-label="Dátum"><%= refueling.refueled_on %></td>
+						<td data-label="Vozidlo"><%= refueling.vehicle.name %></td>
+						<td data-label="Vzdialenosť (km)"><%= number_with_precision(refueling.distance_km, precision: 2) %></td>
+						<td data-label="Množstvo"><%= number_with_precision(refueling.amount, precision: 2) %> <%= refueling.vehicle.unit %></td>
+						<td data-label="Náklady"><%= number_with_precision(refueling.cost, precision: 2) %></td>
+						<td data-label="Spotreba / 100 km"><%= number_with_precision(refueling.consumption_per_100km, precision: 2) %></td>
+						<td data-label="Náklady / 100 km"><%= number_with_precision(refueling.cost_per_100km, precision: 2) %></td>
+						<td class="actions" data-label="Akcie">
 							<%= link_to edit_refueling_path(refueling), class: "icon-button secondary", aria: { label: "Upraviť tankovanie" }, title: "Upraviť tankovanie" do %>
 								<%= image_tag "/icons/edit.svg", alt: "", aria: { hidden: true } %>
 								<span class="sr-only">Upraviť tankovanie</span>

@@ -287,6 +287,18 @@ td {
 	td {
 		border: 0;
 		border-bottom: 1px dashed var(--border);
+		position: relative;
+		padding-left: 50%;
+	}
+
+	td::before {
+		content: attr(data-label);
+		position: absolute;
+		left: 0.35rem;
+		font-weight: 600;
+		color: var(--text-secondary);
+		width: 45%;
+		word-break: break-word;
 	}
 
 	td:last-child {

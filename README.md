@@ -1,5 +1,8 @@
 # Spotreba Fuel Tracker
 
+[![Tests](https://github.com/xkovacikm2/fuel-cost/actions/workflows/test.yml/badge.svg?branch=main)](https://github.com/xkovacikm2/fuel-cost/actions/workflows/test.yml)
+[![Build](https://github.com/xkovacikm2/fuel-cost/actions/workflows/docker.yml/badge.svg?branch=main)](https://github.com/xkovacikm2/fuel-cost/actions/workflows/docker.yml)
+
 Spotreba is a Ruby on Rails 8 app for tracking fuel consumption and travel cost.
 
 Users can:
@@ -10,6 +13,14 @@ Users can:
 - Switch dashboard scope between per-vehicle and combined view
 - Edit/delete mistakes in refueling records
 - Install the app as a PWA on a smartphone
+
+## Demo
+Demo available at [spotreba.kovko.top](https://spotreba.kovko.top)  
+Log in with:
+<dl>
+<dt>email</dt> <dd>demo@demo</dd> 
+<dt>password</dt> <dd>demo</dd>
+</dl>
 
 ## Tech Stack
 
