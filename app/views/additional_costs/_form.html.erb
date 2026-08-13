@@ -1,0 +1,37 @@
+<%= form_with(model: additional_cost) do |form| %>
+  <% if additional_cost.errors.any? %>
+    <div class="errors">
+      <h2>Dodatočný náklad sa nepodarilo uložiť:</h2>
+      <ul>
+        <% additional_cost.errors.each do |error| %>
+          <li><%= error.full_message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= form.label :vehicle_id, "Vozidlo" %>
+    <%= form.collection_select :vehicle_id, @vehicles, :id, :name, {} %>
+  </div>
+
+  <div class="field">
+    <%= form.label :occurred_on, "Dátum nákladu" %>
+    <%= form.date_field :occurred_on %>
+  </div>
+
+  <div class="field">
+    <%= form.label :kind, "Typ nákladu" %>
+    <%= form.select :kind, AdditionalCost.kind_options %>
+  </div>
+
+  <div class="field">
+    <%= form.label :cost, "Náklady" %>
+    <%= form.number_field :cost, step: 0.01, min: 0.01 %>
+  </div>
+
+  <div class="actions">
+    <%= form.submit "Uložiť" %>
+    <%= link_to "Späť", root_path, class: "button secondary" %>
+  </div>
+<% end %>

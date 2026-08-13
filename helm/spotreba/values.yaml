@@ -20,6 +20,16 @@ rails:
   # Secret key base for Rails (generate with: rails secret)
   secretKeyBase: ""
 
+  # SMTP configuration for production mail delivery
+  smtp:
+    enabled: false
+    username: ""
+    password: ""
+    address: ""
+    port: 587
+    authentication: plain
+    enableStarttlsAuto: true
+
 # PostgreSQL database configuration
 postgresql:
   enabled: true

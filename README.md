@@ -96,6 +96,44 @@ When creating a new refueling entry:
 - Vehicle is preselected from the most recent refueling
 - Unit shown in the form is based on that selected vehicle
 
+## Maintenance Reminders
+
+Users can configure an active reminder for each vehicle and additional-cost type.
+Each reminder can have a date interval, a kilometre interval, or both. The latest
+matching additional cost starts a new maintenance cycle. When both conditions are
+configured, the first one to become due triggers the due notification.
+
+Advanced reminders are optional and can be configured as either a number of days
+or kilometres before the base interval. Each advanced reminder sends at most once
+per cycle. A due notification sends at most once per cycle and suppresses any
+remaining advanced reminders. If the application catches up after downtime, it
+sends only the most urgent currently eligible notification.
+
+Mileage is an approximation based on the sum of refueling distances dated after
+the matching additional cost. A refueling recorded on the same date as the cost
+is not counted. The app does not record absolute odometer readings.
+
+The production scan runs every day at 08:00 in the `Europe/Bratislava` time zone.
+It uses Solid Queue and sends emails asynchronously.
+
+### Production Mail Configuration
+
+Set these environment variables in production:
+
+```bash
+MAILER_FROM="Spotreba <notifications@example.com>"
+APP_HOST="spotreba.example.com"
+SMTP_ADDRESS="smtp.example.com"
+SMTP_PORT=587
+SMTP_USERNAME="smtp-user"
+SMTP_PASSWORD="smtp-password"
+SMTP_AUTHENTICATION="plain"
+SMTP_ENABLE_STARTTLS_AUTO=true
+```
+
+Do not commit SMTP credentials. Without `SMTP_ADDRESS`, Rails keeps its default
+mail delivery settings and reminders cannot be sent externally.
+
 ## PWA Installability
 
 This app includes:

@@ -1,0 +1,7 @@
+thirty_days:
+  maintenance_reminder_rule: oil_change
+  days_before: 30
+
+one_thousand_kilometres:
+  maintenance_reminder_rule: oil_change
+  kilometres_before: 1000

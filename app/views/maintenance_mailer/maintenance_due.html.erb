@@ -1,0 +1,21 @@
+<p>Dobrý deň,</p>
+
+<p>
+  <% if @notification.due? %>
+    údržba <strong><%= @rule.kind_label %></strong> pre vozidlo <strong><%= @vehicle.name %></strong> je potrebná.
+  <% else %>
+    blíži sa údržba <strong><%= @rule.kind_label %></strong> pre vozidlo <strong><%= @vehicle.name %></strong>.
+  <% end %>
+</p>
+
+<p>Posledný zaznamenaný náklad bol <%= @additional_cost.occurred_on %>.</p>
+
+<% if @notification.days_remaining.present? %>
+  <p>Do termínu zostáva <strong><%= @notification.days_remaining %> dní</strong>.</p>
+<% end %>
+
+<% if @notification.kilometres_remaining.present? %>
+  <p>Do kilometrového limitu zostáva <strong><%= number_with_precision(@notification.kilometres_remaining, precision: 2, strip_insignificant_zeros: true) %> km</strong>.</p>
+<% end %>
+
+<p>Naplánujte si prosím vhodný termín.</p>
