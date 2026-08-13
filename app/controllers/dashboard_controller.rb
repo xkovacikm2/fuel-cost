@@ -15,7 +15,10 @@ class DashboardController < ApplicationController
     @days_since_last_refueling = Refueling.days_since_last(Current.user, vehicle: stats_vehicle)
     @average_consumption_per_100km = average_consumption_per_100km
     @total_fuel_refilled = total_fuel_refilled
-    @total_cost_paid = total_cost_paid
+    @total_fuel_cost_paid = total_fuel_cost_paid
+    @total_additional_cost_paid = total_additional_cost_paid
+    @total_cost_paid = (@total_fuel_cost_paid + @total_additional_cost_paid).round(2)
+    @additional_costs = AdditionalCost.for_user(Current.user).includes(:vehicle).ordered
 
     setup_refueling_table
   end
@@ -45,13 +48,33 @@ class DashboardController < ApplicationController
 
     def chart_payload
       rows = scoped_refuelings.includes(:vehicle).order(:refueled_on)
-      labels = rows.pluck(:refueled_on).map(&:iso8601).uniq
+      costs = scoped_additional_costs
+      labels = rows.pluck(:refueled_on).map(&:iso8601).uniq.sort
+      labels = costs.pluck(:occurred_on).map(&:iso8601).uniq.sort if labels.empty?
       series = @scope == "combined" ? build_combined_series(rows, labels) : build_single_vehicle_series(rows, labels)
 
       {
         labels: labels,
         datasets: series,
+        additional_costs: costs.map { |cost| additional_cost_payload(cost) },
         title: chart_title
+      }
+    end
+
+    def scoped_additional_costs
+      scope = AdditionalCost.for_user(Current.user).within_range(@window_start, @window_end)
+      return scope.order(:occurred_on) if @scope == "combined"
+      return AdditionalCost.none unless selected_vehicle
+
+      scope.where(vehicle_id: selected_vehicle.id).order(:occurred_on)
+    end
+
+    def additional_cost_payload(cost)
+      {
+        date: cost.occurred_on.iso8601,
+        label: cost.kind_label,
+        vehicle: cost.vehicle.name,
+        cost: cost.cost.to_f
       }
     end
 
@@ -137,7 +160,11 @@ class DashboardController < ApplicationController
       scoped_refuelings.sum(:amount).round(2)
     end
 
-    def total_cost_paid
+    def total_fuel_cost_paid
       scoped_refuelings.sum(:cost).round(2)
+    end
+
+    def total_additional_cost_paid
+      scoped_additional_costs.sum(:cost).round(2)
     end
 end

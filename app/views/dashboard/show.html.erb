@@ -2,11 +2,14 @@
 <section class="card">
 	<h3><%= @chart_payload[:title] %></h3>
 	<% if @chart_payload[:labels].empty? %>
-		<p class="muted">V tomto období nie sú žiadne údaje o tankovaní.</p>
+		<p class="muted">V tomto období nie sú žiadne údaje o tankovaní ani dodatočných nákladoch.</p>
 	<% else %>
 		<div class="chart-wrap" data-controller="chart" data-chart-payload-value="<%= json_escape(@chart_payload.to_json) %>">
 			<canvas data-chart-target="canvas" aria-label="Graf spotreby paliva"></canvas>
 		</div>
+		<% if @chart_payload[:additional_costs].any? %>
+			<p class="muted">Zvislé prerušované čiary označujú dodatočné náklady.</p>
+		<% end %>
 	<% end %>
 </section>
 
@@ -22,8 +25,8 @@
 	</article>
 
 	<article class="card">
-		<h3>Celkové palivo / celkové náklady</h3>
-		<p class="stat"><%= number_with_precision(@total_fuel_refilled, precision: 2) %> <%= @scope == "combined" ? "zmiešané jednotky" : (@selected_vehicle&.unit || "L") %> / <%= number_to_currency(@total_cost_paid, unit: "€", format: "%n %u", precision: 2) %></p>
+		<h3>Celkové náklady</h3>
+		<p class="stat"><%= number_to_currency(@total_cost_paid, unit: "€", format: "%n %u", precision: 2) %></p>
 	</article>
 
 	<article class="card">
@@ -34,7 +37,7 @@
 
 <section class="card">
 	<div class="actions" style="justify-content: space-between; align-items: center;">
-		<h3 style="margin: 0;">Záznamy tankovaní</h3>
+		<h3 style="margin: 0;">Záznamy tankovaní: <%= number_with_precision(@total_fuel_refilled, precision: 2) %> <%= @scope == "combined" ? "zmiešané jednotky" : (@selected_vehicle&.unit || "L") %> / <%= number_to_currency(@total_fuel_cost_paid, unit: "€", format: "%n %u", precision: 2) %></h3>
 			<%= link_to new_refueling_path, class: "icon-button", aria: { label: "Pridať tankovanie" }, title: "Pridať tankovanie" do %>
 					<%= image_tag "/icons/plus.svg", alt: "", aria: { hidden: true } %>
 				<span class="sr-only">Pridať tankovanie</span>
@@ -102,6 +105,52 @@
 				<% end %>
 			</div>
 		</div>
+	<% end %>
+</section>
+
+<section class="card">
+	<div class="actions" style="justify-content: space-between; align-items: center;">
+		<h3 style="margin: 0;">Dodatočné náklady: <%= number_to_currency(@total_additional_cost_paid, unit: "€", format: "%n %u", precision: 2) %></h3>
+		<%= link_to new_additional_cost_path, class: "icon-button", aria: { label: "Pridať dodatočný náklad" }, title: "Pridať dodatočný náklad" do %>
+			<%= image_tag "/icons/plus.svg", alt: "", aria: { hidden: true } %>
+			<span class="sr-only">Pridať dodatočný náklad</span>
+		<% end %>
+	</div>
+
+	<% if @additional_costs.empty? %>
+		<p class="muted">Zatiaľ tu nie sú žiadne dodatočné náklady.</p>
+	<% else %>
+		<table>
+			<thead>
+				<tr>
+					<th>Dátum</th>
+					<th>Vozidlo</th>
+					<th>Typ</th>
+					<th>Náklady</th>
+					<th>Akcie</th>
+				</tr>
+			</thead>
+			<tbody>
+				<% @additional_costs.each do |additional_cost| %>
+					<tr>
+						<td data-label="Dátum"><%= additional_cost.occurred_on %></td>
+						<td data-label="Vozidlo"><%= additional_cost.vehicle.name %></td>
+						<td data-label="Typ"><%= additional_cost.kind_label %></td>
+						<td data-label="Náklady"><%= number_to_currency(additional_cost.cost, unit: "€", format: "%n %u", precision: 2) %></td>
+						<td class="actions" data-label="Akcie">
+							<%= link_to edit_additional_cost_path(additional_cost), class: "icon-button secondary", aria: { label: "Upraviť dodatočný náklad" }, title: "Upraviť dodatočný náklad" do %>
+								<%= image_tag "/icons/edit.svg", alt: "", aria: { hidden: true } %>
+								<span class="sr-only">Upraviť dodatočný náklad</span>
+							<% end %>
+							<%= button_to additional_cost_path(additional_cost), method: :delete, class: "icon-button danger", form: { data: { turbo_confirm: "Vymazať tento dodatočný náklad?" } }, title: "Vymazať dodatočný náklad", aria: { label: "Vymazať dodatočný náklad" } do %>
+								<%= image_tag "/icons/trash.svg", alt: "", aria: { hidden: true } %>
+								<span class="sr-only">Vymazať dodatočný náklad</span>
+							<% end %>
+						</td>
+					</tr>
+				<% end %>
+			</tbody>
+		</table>
 	<% end %>
 </section>
 

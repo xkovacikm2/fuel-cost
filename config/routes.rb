@@ -6,6 +6,8 @@ Rails.application.routes.draw do
   get "dashboard", to: "dashboard#show"
 
   resources :refuelings, except: [ :index, :show ]
+  resources :additional_costs, except: [ :index, :show ]
+  resources :maintenance_reminders, controller: :maintenance_reminders, except: [ :show ]
   resources :vehicles
   resource :session
   resources :passwords, param: :token

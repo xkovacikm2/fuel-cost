@@ -1,0 +1,19 @@
+<div class="reminder-lead" data-maintenance-reminder-form-target="lead" data-persisted="<%= lead_form.object.persisted? %>">
+  <div class="grid grid-2">
+    <div class="field">
+      <%= lead_form.label :time_value, "Čas vopred" %>
+      <div class="input-with-unit">
+        <%= lead_form.number_field :time_value, value: lead_form.object.days_before, min: 1, step: 1 %>
+        <%= select_tag lead_form.field_name(:time_unit), options_for_select([["Dni", "days"], ["Týždne", "weeks"], ["Mesiace", "months"], ["Roky", "years"]], "days") %>
+      </div>
+    </div>
+
+    <div class="field">
+      <%= lead_form.label :kilometres_before, "Kilometrov vopred" %>
+      <%= lead_form.number_field :kilometres_before, min: 0.01, step: 0.01 %>
+    </div>
+  </div>
+
+  <%= lead_form.hidden_field :_destroy %>
+  <button type="button" class="secondary" data-action="maintenance-reminder-form#removeLead">Odstrániť</button>
+</div>

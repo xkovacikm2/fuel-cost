@@ -1,0 +1,12 @@
+oil_change:
+  vehicle: one
+  kind: oil_change
+  interval_days: 365
+  interval_km: 15000
+  active: true
+
+days_only:
+  vehicle: one
+  kind: tire_change
+  interval_days: 180
+  active: true
