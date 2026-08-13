@@ -8,6 +8,7 @@ data:
   RAILS_ENV: {{ .Values.rails.railsEnv | quote }}
   RAILS_LOG_TO_STDOUT: "true"
   RAILS_SERVE_STATIC_FILES: "true"
+  MAILER_FROM: {{ .Values.rails.mailerFrom | quote }}
   HTTP_PORT: "3000"
   POSTGRES_HOST: {{ include "spotreba.postgresqlHost" . | quote }}
   POSTGRES_PORT: "5432"

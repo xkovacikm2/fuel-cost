@@ -20,6 +20,9 @@ rails:
   # Secret key base for Rails (generate with: rails secret)
   secretKeyBase: ""
 
+  # Default sender address for application mail
+  mailerFrom: "from@example.com"
+
   # SMTP configuration for production mail delivery
   smtp:
     enabled: false
