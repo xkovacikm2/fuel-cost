@@ -1,6 +1,7 @@
 class Vehicle < ApplicationRecord
   belongs_to :user
   has_many :refuelings, dependent: :destroy
+  has_many :additional_costs, dependent: :destroy
 
   enum :fuel_type, { petrol: 0, diesel: 1, electricity: 2 }
 

@@ -10,9 +10,20 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_07_27_112607) do
+ActiveRecord::Schema[8.1].define(version: 2026_08_13_120000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
+
+  create_table "additional_costs", force: :cascade do |t|
+    t.decimal "cost", precision: 10, scale: 2, null: false
+    t.datetime "created_at", null: false
+    t.integer "kind", null: false
+    t.date "occurred_on", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "vehicle_id", null: false
+    t.index ["vehicle_id", "occurred_on"], name: "index_additional_costs_on_vehicle_id_and_occurred_on"
+    t.index ["vehicle_id"], name: "index_additional_costs_on_vehicle_id"
+  end
 
   create_table "refuelings", force: :cascade do |t|
     t.decimal "amount", precision: 10, scale: 2, null: false
@@ -53,6 +64,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_27_112607) do
     t.index ["user_id"], name: "index_vehicles_on_user_id"
   end
 
+  add_foreign_key "additional_costs", "vehicles"
   add_foreign_key "refuelings", "vehicles"
   add_foreign_key "sessions", "users"
   add_foreign_key "vehicles", "users"

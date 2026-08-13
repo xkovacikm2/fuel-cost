@@ -1,0 +1,11 @@
+one:
+  vehicle: one
+  occurred_on: 2026-07-20
+  kind: oil_change
+  cost: 49.90
+
+two:
+  vehicle: two
+  occurred_on: 2026-07-21
+  kind: technical_inspection
+  cost: 59.00
