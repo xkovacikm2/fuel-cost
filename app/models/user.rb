@@ -4,6 +4,7 @@ class User < ApplicationRecord
   has_many :vehicles, dependent: :destroy
   has_many :refuelings, through: :vehicles
   has_many :additional_costs, through: :vehicles
+  has_many :maintenance_reminder_rules, through: :vehicles
 
   normalizes :email_address, with: ->(e) { e.strip.downcase }
 

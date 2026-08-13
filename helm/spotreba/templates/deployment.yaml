@@ -47,6 +47,13 @@ spec:
                 secretKeyRef:
                   name: {{ include "spotreba.fullname" . }}
                   key: rails-secret-key-base
+            {{- if .Values.rails.smtp.enabled }}
+            - name: SMTP_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "spotreba.fullname" . }}
+                  key: smtp-password
+            {{- end }}
       containers:
         - name: rails
           image: "{{ .Values.rails.image.repository }}:{{ .Values.rails.image.tag }}"
@@ -69,6 +76,13 @@ spec:
                 secretKeyRef:
                   name: {{ include "spotreba.fullname" . }}
                   key: rails-secret-key-base
+            {{- if .Values.rails.smtp.enabled }}
+            - name: SMTP_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "spotreba.fullname" . }}
+                  key: smtp-password
+            {{- end }}
           livenessProbe:
             httpGet:
               path: /

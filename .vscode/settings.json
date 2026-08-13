@@ -6,6 +6,8 @@
             "approve": true,
             "matchCommandLine": true
         },
-        "bin/rubocop": true
+        "bin/rubocop": true,
+        "bin/rails": true,
+        "bin/brakeman": true
     }
 }

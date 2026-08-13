@@ -1,5 +1,6 @@
 class AdditionalCost < ApplicationRecord
   belongs_to :vehicle
+  has_many :maintenance_notifications, dependent: :destroy
 
   delegate :user, to: :vehicle
 

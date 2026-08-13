@@ -33,15 +33,43 @@
 
   <body>
     <header class="topbar">
-      <div class="container topbar-inner">
+      <div class="container topbar-inner" data-controller="navigation">
+        <% if authenticated? %>
+          <button class="nav-toggle" type="button" data-action="click->navigation#toggle" data-navigation-target="toggle" aria-controls="main-navigation" aria-expanded="false" aria-label="Otvoriť navigáciu" title="Otvoriť navigáciu">
+            <%= image_tag "/icons/menu.svg", alt: "", aria: { hidden: true } %>
+          </button>
+        <% end %>
         <h1 class="brand"><%= link_to "Spotreba", root_path %></h1>
         <% if authenticated? %>
-          <nav class="main-nav">
-            <%= link_to "Prehľad", root_path %>
-            <%= link_to "Nové tankovanie", new_refueling_path %>
-            <%= link_to "Dodatočné náklady", new_additional_cost_path %>
-            <%= link_to "Vozidlá", vehicles_path %>
-            <%= button_to "Odhlásiť sa", session_path, method: :delete, class: "link-button" %>
+          <nav id="main-navigation" class="main-nav" data-navigation-target="menu">
+            <button class="nav-expand" type="button" data-action="click->navigation#expand" data-navigation-target="expand" aria-expanded="false" aria-label="Rozšíriť navigáciu" title="Rozšíriť navigáciu">
+              <%= image_tag "/icons/chevron-right.svg", alt: "", aria: { hidden: true } %>
+              <span>Rozšíriť navigáciu</span>
+            </button>
+            <%= link_to root_path, class: "nav-link", title: "Prehľad" do %>
+              <%= image_tag "/icons/home.svg", alt: "", aria: { hidden: true } %>
+              <span>Prehľad</span>
+            <% end %>
+            <%= link_to new_refueling_path, class: "nav-link", title: "Nové tankovanie" do %>
+              <%= image_tag "/icons/fuel.svg", alt: "", aria: { hidden: true } %>
+              <span>Nové tankovanie</span>
+            <% end %>
+            <%= link_to new_additional_cost_path, class: "nav-link", title: "Dodatočné náklady" do %>
+              <%= image_tag "/icons/receipt.svg", alt: "", aria: { hidden: true } %>
+              <span>Dodatočné náklady</span>
+            <% end %>
+            <%= link_to maintenance_reminders_path, class: "nav-link", title: "Pripomienky" do %>
+              <%= image_tag "/icons/bell.svg", alt: "", aria: { hidden: true } %>
+              <span>Pripomienky</span>
+            <% end %>
+            <%= link_to vehicles_path, class: "nav-link", title: "Vozidlá" do %>
+              <%= image_tag "/icons/car.svg", alt: "", aria: { hidden: true } %>
+              <span>Vozidlá</span>
+            <% end %>
+            <%= button_to session_path, method: :delete, class: "link-button nav-link", title: "Odhlásiť sa" do %>
+              <%= image_tag "/icons/logout.svg", alt: "", aria: { hidden: true } %>
+              <span>Odhlásiť sa</span>
+            <% end %>
           </nav>
         <% else %>
           <nav class="main-nav">

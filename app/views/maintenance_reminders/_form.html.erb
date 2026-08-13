@@ -1,0 +1,68 @@
+<%= form_with(model: maintenance_reminder, url: maintenance_reminder.persisted? ? maintenance_reminder_path(maintenance_reminder) : maintenance_reminders_path) do |form| %>
+  <% if maintenance_reminder.errors.any? %>
+    <div class="errors">
+      <h2>Pripomienku údržby sa nepodarilo uložiť:</h2>
+      <ul>
+        <% maintenance_reminder.errors.each do |error| %>
+          <li><%= error.full_message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="grid grid-2">
+    <div class="field">
+      <%= form.label :vehicle_id, "Vozidlo" %>
+      <%= form.collection_select :vehicle_id, @vehicles, :id, :name, {} %>
+    </div>
+
+    <div class="field">
+      <%= form.label :kind, "Typ údržby" %>
+      <%= form.select :kind, AdditionalCost.kind_options %>
+    </div>
+  </div>
+
+  <div class="grid grid-2">
+    <div class="field">
+      <%= form.label :interval_time_value, "Časový interval" %>
+      <div class="input-with-unit">
+        <%= form.number_field :interval_time_value, value: maintenance_reminder.interval_days, min: 1, step: 1 %>
+        <%= select_tag form.field_name(:interval_time_unit), options_for_select([["Dni", "days"], ["Týždne", "weeks"], ["Mesiace", "months"], ["Roky", "years"]], "days") %>
+      </div>
+    </div>
+
+    <div class="field">
+      <%= form.label :interval_km, "Interval v kilometroch" %>
+      <%= form.number_field :interval_km, min: 0.01, step: 0.01 %>
+    </div>
+  </div>
+
+  <div class="checkbox-field">
+    <%= form.check_box :active %>
+    <%= form.label :active, "Aktívna pripomienka" %>
+  </div>
+
+  <fieldset class="reminder-leads" data-controller="maintenance-reminder-form">
+    <legend>Pokročilé pripomienky</legend>
+    <p class="muted">Pre každú pripomienku môžete vyplniť čas, kilometre alebo oboje. Pri oboch hodnotách vzniknú dve samostatné pripomienky.</p>
+
+    <div data-maintenance-reminder-form-target="leads">
+      <%= form.fields_for :maintenance_reminder_leads do |lead_form| %>
+        <%= render "lead_fields", lead_form: lead_form %>
+      <% end %>
+    </div>
+
+    <template data-maintenance-reminder-form-target="template">
+      <%= form.fields_for :maintenance_reminder_leads, MaintenanceReminderLead.new, child_index: "NEW_RECORD" do |lead_form| %>
+        <%= render "lead_fields", lead_form: lead_form %>
+      <% end %>
+    </template>
+
+    <button type="button" class="secondary" data-action="maintenance-reminder-form#addLead">Pridať pripomienku</button>
+  </fieldset>
+
+  <div class="actions">
+    <%= form.submit "Uložiť" %>
+    <%= link_to "Späť", maintenance_reminders_path, class: "button secondary" %>
+  </div>
+<% end %>

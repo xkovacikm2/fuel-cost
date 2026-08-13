@@ -1,0 +1,60 @@
+<% content_for :title, "Pripomienky údržby" %>
+
+<section class="card">
+  <div class="section-heading">
+    <h2>Pripomienky údržby</h2>
+    <%= link_to new_maintenance_reminder_path, class: "icon-button", aria: { label: "Nová pripomienka" }, title: "Nová pripomienka" do %>
+      <%= image_tag "/icons/plus.svg", alt: "", aria: { hidden: true } %>
+      <span class="sr-only">Nová pripomienka</span>
+    <% end %>
+  </div>
+
+  <% if @maintenance_reminders.empty? %>
+    <p class="muted">Zatiaľ nemáte nastavené žiadne pripomienky údržby.</p>
+  <% else %>
+    <table>
+      <thead>
+        <tr>
+          <th>Vozidlo</th>
+          <th>Údržba</th>
+          <th>Limit</th>
+          <th>Stav</th>
+          <th>Akcie</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @maintenance_reminders.each do |reminder| %>
+          <% cycle = reminder.current_cycle %>
+          <tr>
+            <td data-label="Vozidlo"><%= reminder.vehicle.name %></td>
+            <td data-label="Údržba"><%= reminder.kind_label %></td>
+            <td data-label="Limit">
+              <%= [
+                ("#{reminder.interval_days} dní" if reminder.interval_days.present?),
+                ("#{number_with_precision(reminder.interval_km, precision: 2, strip_insignificant_zeros: true)} km" if reminder.interval_km.present?)
+              ].compact.join(" / ") %>
+            </td>
+            <td data-label="Stav">
+              <% if !reminder.active? %>
+                Neaktívna
+              <% elsif cycle.nil? %>
+                Čaká na prvý záznam
+              <% elsif cycle.days_remaining && cycle.days_remaining <= 0 || cycle.kilometres_remaining && cycle.kilometres_remaining <= 0 %>
+                Termín je potrebný
+              <% else %>
+                <%= [
+                  ("#{cycle.days_remaining} dní" if cycle.days_remaining),
+                  ("#{number_with_precision(cycle.kilometres_remaining, precision: 2, strip_insignificant_zeros: true)} km" if cycle.kilometres_remaining)
+                ].compact.join(" / ") %>
+              <% end %>
+            </td>
+            <td class="actions" data-label="Akcie">
+              <%= link_to "Upraviť", edit_maintenance_reminder_path(reminder), class: "button secondary" %>
+              <%= button_to "Vymazať", maintenance_reminder_path(reminder), method: :delete, class: "danger", form: { data: { turbo_confirm: "Vymazať túto pripomienku?" } } %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  <% end %>
+</section>
