@@ -8,7 +8,7 @@
   <% end %>
 </p>
 
-<p>Posledný zaznamenaný náklad bol <%= @additional_cost.occurred_on %>.</p>
+<p>Posledný záznam tohoto typu bol <%= @additional_cost.occurred_on %>.</p>
 
 <% if @notification.days_remaining.present? %>
   <p>Do termínu zostáva <strong><%= @notification.days_remaining %> dní</strong>.</p>
@@ -18,4 +18,6 @@
   <p>Do kilometrového limitu zostáva <strong><%= number_with_precision(@notification.kilometres_remaining, precision: 2, strip_insignificant_zeros: true) %> km</strong>.</p>
 <% end %>
 
-<p>Naplánujte si prosím vhodný termín.</p>
+<p>Naplánujte si prosím vhodný termín na vykonanie údržby.</p>
+
+<p>Na tento mail neodpovedajte, je generovaný na základe vami nastavenej pripomienky.</p>
