@@ -9,6 +9,7 @@ export default class extends Controller {
     if (!isOpen) {
       this.menuTarget.classList.remove("is-expanded")
       this.expandTarget.setAttribute("aria-expanded", "false")
+      this.menuTarget.querySelector(".user-menu")?.dispatchEvent(new CustomEvent("navigation:closed"))
     }
 
     this.toggleTarget.setAttribute("aria-expanded", isOpen)

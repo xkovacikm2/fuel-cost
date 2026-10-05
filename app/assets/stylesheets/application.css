@@ -97,6 +97,46 @@ a:hover {
 	display: none;
 }
 
+.user-menu {
+	position: relative;
+}
+
+.user-menu-panel {
+	position: absolute;
+	top: calc(100% + 0.75rem);
+	right: 0;
+	display: grid;
+	gap: 0.25rem;
+	width: 13.5rem;
+	padding: 0.45rem;
+	border: 1px solid var(--border);
+	border-radius: 6px;
+	background: var(--card);
+	box-shadow: 0 0.5rem 1rem rgb(31 41 55 / 12%);
+}
+
+.user-menu-panel[hidden] {
+	display: none;
+}
+
+.user-menu-panel .nav-link {
+	width: 100%;
+	min-height: 2.5rem;
+	padding: 0.55rem;
+	border-radius: 4px;
+	text-align: left;
+}
+
+.user-menu-panel .nav-link:hover,
+.user-menu-panel .nav-link:focus-visible {
+	background: var(--primary-soft);
+}
+
+.user-menu-panel button:disabled {
+	opacity: 0.5;
+	cursor: progress;
+}
+
 .link-button {
 	border: 0;
 	padding: 0;
@@ -361,6 +401,7 @@ td {
 		left: 0;
 		display: flex;
 		flex-direction: column;
+		flex-wrap: nowrap;
 		align-items: stretch;
 		gap: 0.2rem;
 		width: 3.25rem;
@@ -377,8 +418,14 @@ td {
 		display: none;
 	}
 
+	.main-nav > * {
+		flex-shrink: 0;
+	}
+
 	.main-nav.is-expanded {
 		width: min(15rem, 80vw);
+		max-height: calc(100dvh - 4rem);
+		overflow-y: auto;
 	}
 
 	.nav-expand {
@@ -426,6 +473,33 @@ td {
 	}
 
 	.main-nav.is-expanded .nav-link span {
+		display: inline;
+	}
+
+	.main-nav:has(.user-menu-panel:not([hidden])) {
+		overflow: visible;
+	}
+
+	.main-nav.is-expanded:has(.user-menu-panel:not([hidden])) {
+		overflow-y: auto;
+	}
+
+	.user-menu-panel {
+		top: auto;
+		bottom: 0;
+		left: calc(100% + 0.5rem);
+		right: auto;
+		width: min(13.5rem, calc(92vw - 4.25rem));
+	}
+
+	.main-nav.is-expanded .user-menu-panel {
+		position: static;
+		width: 100%;
+		margin-top: 0.25rem;
+		box-shadow: none;
+	}
+
+	.main-nav .user-menu-panel .nav-link span {
 		display: inline;
 	}
 

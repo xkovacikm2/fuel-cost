@@ -66,10 +66,29 @@
               <%= image_tag "/icons/car.svg", alt: "", aria: { hidden: true } %>
               <span>Vozidlá</span>
             <% end %>
-            <%= button_to session_path, method: :delete, class: "link-button nav-link", title: "Odhlásiť sa" do %>
-              <%= image_tag "/icons/logout.svg", alt: "", aria: { hidden: true } %>
-              <span>Odhlásiť sa</span>
-            <% end %>
+            <div class="user-menu" data-controller="user-menu" data-action="click@window->user-menu#closeOutside keydown.esc@window->user-menu#escape turbo:before-cache@document->user-menu#reset navigation:closed->user-menu#reset">
+              <button type="button" class="link-button nav-link" title="Používateľ" aria-controls="user-menu-panel" aria-expanded="false" data-user-menu-target="toggle" data-action="user-menu#toggle">
+                <%= image_tag "/icons/user.svg", alt: "", aria: { hidden: true } %>
+                <span>Používateľ</span>
+              </button>
+              <div id="user-menu-panel" class="user-menu-panel" data-user-menu-target="panel" hidden>
+                <%= link_to export_user_data_path, class: "nav-link", title: "Exportovať JSON", data: { turbo: false, action: "user-menu#close" } do %>
+                  <%= image_tag "/icons/download.svg", alt: "", aria: { hidden: true } %>
+                  <span>Exportovať JSON</span>
+                <% end %>
+                <%= form_with url: import_user_data_path, multipart: true, data: { user_menu_target: "form", action: "submit->user-menu#busy turbo:submit-end->user-menu#reset" } do |form| %>
+                  <%= form.file_field :file, accept: ".json,application/json", required: true, hidden: true, aria: { label: "JSON súbor na import" }, data: { user_menu_target: "file", action: "change->user-menu#upload" } %>
+                  <button type="button" class="link-button nav-link" title="Importovať JSON" data-user-menu-target="importButton" data-action="user-menu#chooseFile">
+                    <%= image_tag "/icons/upload.svg", alt: "", aria: { hidden: true } %>
+                    <span>Importovať JSON</span>
+                  </button>
+                <% end %>
+                <%= button_to session_path, method: :delete, class: "link-button nav-link", title: "Odhlásiť sa" do %>
+                  <%= image_tag "/icons/logout.svg", alt: "", aria: { hidden: true } %>
+                  <span>Odhlásiť sa</span>
+                <% end %>
+              </div>
+            </div>
           </nav>
         <% else %>
           <nav class="main-nav">

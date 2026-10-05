@@ -134,6 +134,84 @@ SMTP_ENABLE_STARTTLS_AUTO=true
 Do not commit SMTP credentials. Without `SMTP_ADDRESS`, Rails keeps its default
 mail delivery settings and reminders cannot be sent externally.
 
+## JSON Backup and Restore
+
+The **Používateľ** navigation submenu contains JSON export, JSON import, and
+logout. Export downloads all owned vehicles, refuelings, additional costs,
+maintenance reminder rules and leads, and notification history. Import opens a
+file chooser and submits the selected file immediately. The result reports
+imported/skipped counts and conflict reasons.
+
+Exports exclude passwords, login sessions, background jobs, and calculated
+dashboard metrics. Account email and timestamps are informational: importing
+never changes the signed-in account. Treat backup files as private financial data.
+
+### Version 1 Format
+
+The root contains exactly `format`, `version`, `exported_at`, `account`, and
+`vehicles`. An empty account produces this valid shape:
+
+```json
+{
+	"format": "spotreba",
+	"version": 1,
+	"exported_at": "2026-10-05T12:00:00.000000Z",
+	"account": {
+		"email_address": "owner@example.com",
+		"created_at": "2026-10-01T12:00:00.000000Z",
+		"updated_at": "2026-10-01T12:00:00.000000Z"
+	},
+	"vehicles": []
+}
+```
+
+Every domain record includes `id`, `created_at`, and `updated_at` plus:
+
+| Collection | Fields |
+| --- | --- |
+| `vehicles` | `name`, `fuel_type`, `refuelings`, `additional_costs`, `maintenance_reminder_rules`, `maintenance_notifications` |
+| `refuelings` | `refueled_on`, `distance_km`, `amount`, `cost` |
+| `additional_costs` | `occurred_on`, `kind`, `cost` |
+| `maintenance_reminder_rules` | `kind`, `interval_days`, `interval_km`, `active`, `maintenance_reminder_leads` |
+| `maintenance_reminder_leads` | `days_before`, `kilometres_before` |
+| `maintenance_notifications` | `maintenance_reminder_rule_id`, `maintenance_reminder_lead_id`, `additional_cost_id`, `notification_kind`, `trigger_condition`, `status`, `days_remaining`, `kilometres_remaining`, `sent_at` |
+
+Collections are arrays nested under their vehicle, except leads which are nested
+under their rule. Source IDs are positive integers unique within each collection
+type and used only to remap relationships, never as destination IDs. Notification
+references must resolve inside the same vehicle, with the cost matching the rule
+kind and an advance lead belonging to that rule.
+
+Dates use `YYYY-MM-DD`; timestamps use ISO 8601 with a timezone and at most six
+fractional digits. Decimal values are strings with at most eight integer digits
+and two fractional digits. Enums use the model's string names; `active` is a JSON
+boolean. Optional fields must be present with `null` when absent. New records
+retain their original timestamps. Unknown/missing fields and unsupported versions
+are rejected. Limits: 10 MiB per upload, 100,000 domain records, nesting depth 32.
+
+### Conflicts and Validation
+
+The whole file is validated before writing anything. Invalid JSON, values, or
+references reject the entire upload. Valid imports are transactional: unexpected
+database failures roll back all newly imported records. Existing records are
+never overwritten, and all imported data belongs to the signed-in user.
+
+- Vehicles match exact name plus fuel type. Missing children merge into one
+	matching vehicle. No compatible match creates a new vehicle, even if another
+	fuel type has the same name. Multiple matches skip that vehicle and its children.
+- Refuelings match vehicle, date, distance, amount, and cost; additional costs
+	match vehicle, date, kind, and cost. Exact identical records are duplicates even
+	if source IDs or timestamps differ; distinct values on the same date import.
+- Rules match vehicle and kind. Existing intervals and active state remain
+	unchanged. Matching configurations merge missing leads/history; differing
+	configurations skip the imported rule, its leads, and related notifications.
+- Leads match rule and dimension/value. Notifications match rule, cost, and kind,
+	plus lead for advance notifications. Duplicate parents are mapped to existing
+	records so missing dependent records can still import.
+- Imported queued notifications become skipped; other statuses are preserved.
+	Import never sends emails or schedules delivery jobs. Existing notification
+	history/status is retained on conflict.
+
 ## PWA Installability
 
 This app includes:
