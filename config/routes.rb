@@ -9,6 +9,8 @@ Rails.application.routes.draw do
   resources :additional_costs, except: [ :index, :show ]
   resources :maintenance_reminders, controller: :maintenance_reminders, except: [ :show ]
   resources :vehicles
+  get "user_data/export", to: "user_data#export", as: :export_user_data
+  post "user_data/import", to: "user_data#import", as: :import_user_data
   resource :session
   resources :passwords, param: :token
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
