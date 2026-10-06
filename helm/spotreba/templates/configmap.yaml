@@ -10,6 +10,7 @@ data:
   RAILS_SERVE_STATIC_FILES: "true"
   MAILER_FROM: {{ .Values.rails.mailerFrom | quote }}
   HTTP_PORT: "3000"
+  RAILS_ASSUME_SSL: {{ .Values.rails.assumeSsl | quote }}
   POSTGRES_HOST: {{ include "spotreba.postgresqlHost" . | quote }}
   POSTGRES_PORT: "5432"
   POSTGRES_DB: {{ .Values.postgresql.auth.database | quote }}
