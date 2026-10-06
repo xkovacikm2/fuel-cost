@@ -1,5 +1,5 @@
 {{- if .Values.ingress.enabled }}
-{{- if .Values.ingress.tls.enabled }}
+{{- if and .Values.ingress.tls.enabled (not .Values.ingress.httpOnly) }}
 ---
 # Certificate for TLS
 apiVersion: cert-manager.io/v1

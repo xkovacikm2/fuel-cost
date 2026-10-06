@@ -16,6 +16,9 @@ rails:
 
   # Rails environment
   railsEnv: production
+
+  # Set true when TLS is terminated upstream (e.g. Cloudflare) and the app receives plain HTTP
+  assumeSsl: false
   
   # Secret key base for Rails (generate with: rails secret)
   secretKeyBase: ""
@@ -63,6 +66,8 @@ postgresql:
 # Ingress configuration (Traefik IngressRoute CRD)
 ingress:
   enabled: true
+  # Serve HTTP only, overriding TLS and disabling the HTTPS redirect
+  httpOnly: false
   hostname: spotreba.example.com
   # TLS configuration with cert-manager
   tls:

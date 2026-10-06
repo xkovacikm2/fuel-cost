@@ -83,17 +83,5 @@ spec:
                   name: {{ include "spotreba.fullname" . }}
                   key: smtp-password
             {{- end }}
-          livenessProbe:
-            httpGet:
-              path: /
-              port: http
-            initialDelaySeconds: 30
-            periodSeconds: 10
-          readinessProbe:
-            httpGet:
-              path: /
-              port: http
-            initialDelaySeconds: 5
-            periodSeconds: 5
           resources:
             {{- toYaml .Values.rails.resources | nindent 12 }}
