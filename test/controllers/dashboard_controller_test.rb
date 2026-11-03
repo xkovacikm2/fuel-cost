@@ -24,6 +24,14 @@ class DashboardControllerTest < ActionDispatch::IntegrationTest
     assert_includes response.body, "Výmena oleja"
   end
 
+  test "shows additional cost comment between type and cost" do
+    get root_url
+
+    assert_select "td[data-label='Poznámka']", text: "Pravidelný servis"
+    headers = css_select("th").map { |header| header.text.strip }
+    assert_equal [ "Typ", "Poznámka", "Náklady" ], headers[headers.index("Typ"), 3]
+  end
+
   test "adds mobile labels to refueling table cells" do
     get root_url
 

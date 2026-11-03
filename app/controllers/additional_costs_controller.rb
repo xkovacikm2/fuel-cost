@@ -49,7 +49,7 @@ class AdditionalCostsController < ApplicationController
     end
 
     def additional_cost_params
-      params.expect(additional_cost: [ :vehicle_id, :occurred_on, :kind, :cost ])
+      params.expect(additional_cost: [ :vehicle_id, :occurred_on, :kind, :comment, :cost ])
     end
 
     def set_vehicles

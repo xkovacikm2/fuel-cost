@@ -27,6 +27,9 @@ class AdditionalCost < ApplicationRecord
   validates :occurred_on, presence: true
   validates :kind, presence: true
   validates :cost, presence: true, numericality: { greater_than: 0 }
+  validates :comment, length: { maximum: 255 }
+
+  normalizes :comment, with: ->(comment) { comment.strip.presence }
 
   scope :ordered, -> { order(occurred_on: :desc, created_at: :desc) }
   scope :within_range, ->(from_date, to_date) { where(occurred_on: from_date..to_date) }
