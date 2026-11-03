@@ -80,6 +80,7 @@ Derived metrics:
 - Use `decimal` with precision/scale for measured values and money.
 - Prefer reversible migrations and explicit constraints (`null: false`, indexes).
 - Follow Omakase Rails style and keep RuboCop clean.
+- Follow TDD's red-green-refactor workflow when implementing new features or bug fixes: write a failing test, make it pass, then refactor.
 
 ## Security Expectations
 

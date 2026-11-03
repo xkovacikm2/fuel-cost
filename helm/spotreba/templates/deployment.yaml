@@ -15,6 +15,9 @@ spec:
       labels:
         {{- include "spotreba.selectorLabels" . | nindent 8 }}
         app.kubernetes.io/component: web
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+        checksum/secret: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}
     spec:
       initContainers:
         - name: wait-for-postgres
