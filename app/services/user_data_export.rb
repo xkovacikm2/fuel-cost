@@ -4,7 +4,7 @@ class UserDataExport
   FIELDS = {
     vehicles: { id: :id, name: :string, fuel_type: :fuel_type },
     refuelings: { id: :id, refueled_on: :date, distance_km: :positive_decimal, amount: :positive_decimal, cost: :positive_decimal },
-    additional_costs: { id: :id, occurred_on: :date, kind: :kind, cost: :positive_decimal },
+    additional_costs: { id: :id, occurred_on: :date, kind: :kind, comment: :optional_string, cost: :positive_decimal },
     maintenance_reminder_rules: { id: :id, kind: :kind, interval_days: :optional_positive_integer, interval_km: :optional_positive_decimal, active: :boolean },
     maintenance_reminder_leads: { id: :id, days_before: :optional_positive_integer, kilometres_before: :optional_positive_decimal },
     maintenance_notifications: {

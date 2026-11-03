@@ -171,7 +171,7 @@ Every domain record includes `id`, `created_at`, and `updated_at` plus:
 | --- | --- |
 | `vehicles` | `name`, `fuel_type`, `refuelings`, `additional_costs`, `maintenance_reminder_rules`, `maintenance_notifications` |
 | `refuelings` | `refueled_on`, `distance_km`, `amount`, `cost` |
-| `additional_costs` | `occurred_on`, `kind`, `cost` |
+| `additional_costs` | `occurred_on`, `kind`, `comment` (optional, may be `null` or omitted), `cost` |
 | `maintenance_reminder_rules` | `kind`, `interval_days`, `interval_km`, `active`, `maintenance_reminder_leads` |
 | `maintenance_reminder_leads` | `days_before`, `kilometres_before` |
 | `maintenance_notifications` | `maintenance_reminder_rule_id`, `maintenance_reminder_lead_id`, `additional_cost_id`, `notification_kind`, `trigger_condition`, `status`, `days_remaining`, `kilometres_remaining`, `sent_at` |

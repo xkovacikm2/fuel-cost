@@ -126,6 +126,7 @@
 					<th>Dátum</th>
 					<th>Vozidlo</th>
 					<th>Typ</th>
+					<th>Poznámka</th>
 					<th>Náklady</th>
 					<th>Akcie</th>
 				</tr>
@@ -136,6 +137,7 @@
 						<td data-label="Dátum"><%= additional_cost.occurred_on %></td>
 						<td data-label="Vozidlo"><%= additional_cost.vehicle.name %></td>
 						<td data-label="Typ"><%= additional_cost.kind_label %></td>
+						<td data-label="Poznámka"><%= additional_cost.comment %></td>
 						<td data-label="Náklady"><%= number_to_currency(additional_cost.cost, unit: "€", format: "%n %u", precision: 2) %></td>
 						<td class="actions" data-label="Akcie">
 							<%= link_to edit_additional_cost_path(additional_cost), class: "icon-button secondary", aria: { label: "Upraviť dodatočný náklad" }, title: "Upraviť dodatočný náklad" do %>

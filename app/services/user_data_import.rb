@@ -18,6 +18,8 @@ class UserDataImport
     additional_costs: [ :occurred_on, :kind, :cost ], maintenance_reminder_rules: [ :kind ],
     maintenance_reminder_leads: [ :days_before, :kilometres_before ]
   }.freeze
+  # Keys added after format v1 was published; older files may omit them.
+  OPTIONAL_KEYS = { additional_costs: [ :comment ] }.freeze
   Node = Struct.new(:collection, :attributes, :record, :children, keyword_init: true)
   Result = Struct.new(:imported, :skipped, :reasons, :normalized_notifications, keyword_init: true)
 
@@ -100,7 +102,9 @@ class UserDataImport
       @record_count += 1
       invalid!(path, "príliš veľa záznamov") if @record_count > MAX_RECORDS
       fields = UserDataExport::FIELDS.fetch(collection)
-      check_keys(data, fields.keys.map(&:to_s) + CHILDREN.fetch(collection, []).map(&:to_s), path)
+      keys = fields.keys.map(&:to_s) + CHILDREN.fetch(collection, []).map(&:to_s)
+      missing_optional = data.is_a?(Hash) ? OPTIONAL_KEYS.fetch(collection, []).map(&:to_s) - data.keys : []
+      check_keys(data, keys - missing_optional, path)
       attributes = fields.to_h { |field, type| [ field, convert(data[field.to_s], type, "#{path}.#{field}") ] }
       invalid!(path, "duplicitné zdrojové ID") if @sources[collection].key?(attributes[:id])
       record = MODELS.fetch(collection).new(writable_attributes(attributes).merge(associations))

@@ -18,7 +18,7 @@ body {
 	margin: 0;
 	font-family: "Segoe UI", "Noto Sans", sans-serif;
 	color: var(--text);
-	background: radial-gradient(circle at top right, #e8efff, var(--bg) 35%);
+	background: var(--bg);
 }
 
 a {

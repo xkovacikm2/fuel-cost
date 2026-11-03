@@ -26,6 +26,11 @@
   </div>
 
   <div class="field">
+    <%= form.label :comment, "Poznámka" %>
+    <%= form.text_field :comment, maxlength: 255 %>
+  </div>
+
+  <div class="field">
     <%= form.label :cost, "Náklady" %>
     <%= form.number_field :cost, step: 0.01, min: 0.01 %>
   </div>

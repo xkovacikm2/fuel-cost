@@ -36,6 +36,21 @@ class UserDataImportTest < ActiveSupport::TestCase
     assert_equal 0, import.imported.values.sum
   end
 
+  test "imports additional cost comments and accepts files without the comment key" do
+    costs = @payload["vehicles"].flat_map { |vehicle| vehicle["additional_costs"] }
+    assert_equal "Pravidelný servis", costs.find { |cost| cost["id"] == additional_costs(:one).id }["comment"]
+    import
+    assert_equal "Pravidelný servis", @target.additional_costs.find_by!(kind: :oil_change).comment
+
+    other = User.create!(email_address: "legacy-import@example.com", password: "password")
+    costs.each { |cost| cost.delete("comment") }
+    UserDataImport.new(other, @payload.to_json).call
+    assert_nil other.additional_costs.find_by!(kind: :oil_change).comment
+
+    costs.first["unexpected"] = "x"
+    assert_raises(UserDataImport::InvalidFile) { UserDataImport.new(other, @payload.to_json).call }
+  end
+
   test "merges missing children into an existing vehicle" do
     original = @payload["vehicles"].first
     vehicle = @target.vehicles.create!(name: original["name"], fuel_type: original["fuel_type"])
