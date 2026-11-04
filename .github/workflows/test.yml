@@ -14,28 +14,87 @@ jobs:
 
     services:
       postgres:
-        image: postgres
+        image: postgres:16
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: spotreba_go_e2e
         ports:
           - 5432:5432
         options: --health-cmd="pg_isready" --health-interval=10s --health-timeout=5s --health-retries=3
+      mailpit:
+        image: axllent/mailpit:latest
+        ports:
+          - 1025:1025
+          - 8025:8025
 
     steps:
-      - name: Install packages
-        run: sudo apt-get update && sudo apt-get install --no-install-recommends -y libpq-dev
-
       - name: Checkout code
         uses: actions/checkout@v7
 
-      - name: Set up Ruby
-        uses: ruby/setup-ruby@v1
+      - name: Set up Go
+        uses: actions/setup-go@v6
         with:
-          bundler-cache: true
+          go-version-file: server/go.mod
+          cache-dependency-path: server/go.sum
 
-      - name: Run tests
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: |
+            web/package-lock.json
+            e2e/package-lock.json
+
+      - name: Install and build frontend
+        working-directory: web
+        run: npm ci && npm run build
+
+      - name: Prepare isolated Go test database
         env:
-          RAILS_ENV: test
-          DATABASE_URL: postgres://postgres:postgres@localhost:5432
-        run: bin/rails db:test:prepare test
+          DATABASE_URL: postgres://postgres:postgres@localhost:5432/spotreba_go_e2e?sslmode=disable
+        working-directory: server
+        run: go run ./cmd/spotreba migrate
+
+      - name: Test Go backend and migration parity
+        env:
+          MIGRATION_TEST_DATABASE_URL: postgres://postgres:postgres@localhost:5432/spotreba_go_e2e?sslmode=disable
+        working-directory: server
+        run: go test ./...
+
+      - name: Install e2e dependencies
+        working-directory: e2e
+        run: npm ci && npx playwright install --with-deps chromium
+
+      - name: Start Go server
+        env:
+          DATABASE_URL: postgres://postgres:postgres@localhost:5432/spotreba_go_e2e?sslmode=disable
+          SECRET_KEY: test-only-secret-that-is-at-least-32-bytes
+          APP_TZ: Europe/Bratislava
+          APP_HOST: localhost:8080
+          SMTP_ADDRESS: localhost
+          SMTP_PORT: "1025"
+          MAILER_FROM: spotreba@example.test
+          TRUSTED_PROXY_CIDRS: 127.0.0.0/8,::1/128
+        run: |
+          cd server
+          go run ./cmd/spotreba serve >/tmp/spotreba.log 2>&1 &
+          curl --retry 30 --retry-connrefused --retry-delay 1 -fsS http://localhost:8080/up
+
+      - name: Run browser feature parity suite
+        env:
+          TARGET: go
+          BASE_URL: http://localhost:8080
+          E2E_DATABASE_URL: postgres://postgres:postgres@localhost:5432/spotreba_go_e2e?sslmode=disable
+          MAILPIT_URL: http://localhost:8025
+          REMINDERS_CWD: ${{ github.workspace }}/server
+          REMINDERS_CMD: go run ./cmd/spotreba check-reminders
+          DATABASE_URL: postgres://postgres:postgres@localhost:5432/spotreba_go_e2e?sslmode=disable
+          SECRET_KEY: test-only-secret-that-is-at-least-32-bytes
+          APP_TZ: Europe/Bratislava
+          SMTP_ADDRESS: localhost
+          SMTP_PORT: "1025"
+          MAILER_FROM: spotreba@example.test
+        working-directory: e2e
+        run: npx playwright test

@@ -5,7 +5,7 @@ metadata:
   labels:
     {{- include "spotreba.labels" . | nindent 4 }}
 spec:
-  replicas: {{ .Values.rails.replicaCount }}
+  replicas: {{ .Values.app.replicaCount }}
   selector:
     matchLabels:
       {{- include "spotreba.selectorLabels" . | nindent 6 }}
@@ -31,60 +31,59 @@ spec:
                 sleep 2
               done
         - name: db-migrate
-          image: "{{ .Values.rails.image.repository }}:{{ .Values.rails.image.tag }}"
-          imagePullPolicy: {{ .Values.rails.image.pullPolicy }}
-          command:
-            - bin/rails
-            - db:prepare
+          image: "{{ .Values.app.image.repository }}:{{ .Values.app.image.tag }}"
+          imagePullPolicy: {{ .Values.app.image.pullPolicy }}
+          command: ["/spotreba", "migrate"]
           envFrom:
             - configMapRef:
                 name: {{ include "spotreba.fullname" . }}
           env:
-            - name: SPOTREBA_DATABASE_PASSWORD
+            - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: {{ include "spotreba.fullname" . }}
                   key: postgres-password
-            - name: SECRET_KEY_BASE
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "spotreba.fullname" . }}
-                  key: rails-secret-key-base
-            {{- if .Values.rails.smtp.enabled }}
-            - name: SMTP_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "spotreba.fullname" . }}
-                  key: smtp-password
-            {{- end }}
+            - name: DATABASE_URL
+              value: {{ include "spotreba.databaseUrl" . | quote }}
       containers:
-        - name: rails
-          image: "{{ .Values.rails.image.repository }}:{{ .Values.rails.image.tag }}"
-          imagePullPolicy: {{ .Values.rails.image.pullPolicy }}
+        - name: spotreba
+          image: "{{ .Values.app.image.repository }}:{{ .Values.app.image.tag }}"
+          imagePullPolicy: {{ .Values.app.image.pullPolicy }}
+          args: ["serve"]
           ports:
             - name: http
-              containerPort: 3000
+              containerPort: {{ .Values.app.port }}
               protocol: TCP
           envFrom:
             - configMapRef:
                 name: {{ include "spotreba.fullname" . }}
           env:
-            - name: SPOTREBA_DATABASE_PASSWORD
+            - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: {{ include "spotreba.fullname" . }}
                   key: postgres-password
-            - name: SECRET_KEY_BASE
+            - name: DATABASE_URL
+              value: {{ include "spotreba.databaseUrl" . | quote }}
+            - name: SECRET_KEY
               valueFrom:
                 secretKeyRef:
                   name: {{ include "spotreba.fullname" . }}
-                  key: rails-secret-key-base
-            {{- if .Values.rails.smtp.enabled }}
+                  key: app-secret-key
+            {{- if .Values.app.smtp.enabled }}
             - name: SMTP_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: {{ include "spotreba.fullname" . }}
                   key: smtp-password
             {{- end }}
+          readinessProbe:
+            httpGet:
+              path: /up
+              port: http
+          livenessProbe:
+            httpGet:
+              path: /up
+              port: http
           resources:
-            {{- toYaml .Values.rails.resources | nindent 12 }}
+            {{- toYaml .Values.app.resources | nindent 12 }}

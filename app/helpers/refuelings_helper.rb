@@ -1,2 +1,0 @@
-module RefuelingsHelper
-end

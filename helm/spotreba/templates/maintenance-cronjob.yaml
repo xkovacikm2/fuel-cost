@@ -1,0 +1,51 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ include "spotreba.fullname" . }}-maintenance
+  labels:
+    {{- include "spotreba.labels" . | nindent 4 }}
+spec:
+  schedule: {{ .Values.app.reminders.schedule | quote }}
+  timeZone: {{ .Values.app.reminders.timeZone | quote }}
+  concurrencyPolicy: Forbid
+  startingDeadlineSeconds: 3600
+  jobTemplate:
+    spec:
+      backoffLimit: 0
+      template:
+        metadata:
+          labels:
+            {{- include "spotreba.selectorLabels" . | nindent 12 }}
+            app.kubernetes.io/component: maintenance
+        spec:
+          restartPolicy: Never
+          containers:
+            - name: maintenance
+              image: "{{ .Values.app.image.repository }}:{{ .Values.app.image.tag }}"
+              imagePullPolicy: {{ .Values.app.image.pullPolicy }}
+              command: ["/spotreba", "check-reminders"]
+              envFrom:
+                - configMapRef:
+                    name: {{ include "spotreba.fullname" . }}
+              env:
+                - name: POSTGRES_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: {{ include "spotreba.fullname" . }}
+                      key: postgres-password
+                - name: DATABASE_URL
+                  value: {{ include "spotreba.databaseUrl" . | quote }}
+                - name: SECRET_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: {{ include "spotreba.fullname" . }}
+                      key: app-secret-key
+                {{- if .Values.app.smtp.enabled }}
+                - name: SMTP_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: {{ include "spotreba.fullname" . }}
+                      key: smtp-password
+                {{- end }}
+              resources:
+                {{- toYaml .Values.app.resources | nindent 16 }}

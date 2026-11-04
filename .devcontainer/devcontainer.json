@@ -1,5 +1,5 @@
 {
-  "name": "Spotreba",
+  "name": "Spotreba Go and Lit",
   "dockerComposeFile": "docker-compose.yml",
   "service": "app",
   "workspaceFolder": "/workspace/spotreba",
@@ -10,20 +10,32 @@
   "customizations": {
     "vscode": {
       "extensions": [
-        "Shopify.ruby-lsp",
-        "bradlc.vscode-tailwindcss",
+        "golang.go",
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "runem.lit-plugin",
+        "ms-playwright.playwright",
         "ms-azuretools.vscode-containers",
-        "cweijan.vscode-database-client2",
-        "KoichiSasada.vscode-rdbg"
-      ]
+        "cweijan.vscode-database-client2"
+      ],
+      "mcp": {
+        "servers": {
+          "github": {
+            "type": "http",
+            "url": "https://api.githubcopilot.com/mcp/"
+          }
+        }
+      }
     }
   },
   "forwardPorts": [
-    3000,
-    5432
+    8080,
+    5173,
+    5432,
+    "mailpit:8025"
   ],
   "postCreateCommand": {
-    "initRails": "bundle install && rails db:create db:migrate",
+    "init": "bash .devcontainer/init.sh",
     "moveSsh": "mkdir -p /home/vscode/.ssh; cp /home/vscode/.ssh-copy/* /home/vscode/.ssh/ 2>/dev/null || true; chmod 600 /home/vscode/.ssh/* 2>/dev/null || true",
     "gitconfigPermission": "cp /home/vscode/.gitconfig-copy /home/vscode/.gitconfig 2>/dev/null || true; chown vscode:vscode /home/vscode/.gitconfig 2>/dev/null || true"
   },

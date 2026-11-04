@@ -1,11 +1,12 @@
-# Rails application configuration
-rails:
+# Go application configuration
+app:
   replicaCount: 1
   image:
     repository: hocikto19/spotreba
     tag: latest
     pullPolicy: IfNotPresent
-  
+
+  port: 8080
   resources:
     limits:
       cpu: 500m
@@ -14,27 +15,22 @@ rails:
       cpu: 100m
       memory: 256Mi
 
-  # Rails environment
-  railsEnv: production
-
-  # Set true when TLS is terminated upstream (e.g. Cloudflare) and the app receives plain HTTP
+  # Set true when TLS is terminated upstream and the app receives plain HTTP.
   assumeSsl: false
-  
-  # Secret key base for Rails (generate with: rails secret)
-  secretKeyBase: ""
-
-  # Default sender address for application mail
+  secretKey: ""
+  host: spotreba.example.com
+  timeZone: Europe/Bratislava
+  trustedProxyCIDRs: []
   mailerFrom: "from@example.com"
-
-  # SMTP configuration for production mail delivery
   smtp:
     enabled: false
     username: ""
     password: ""
     address: ""
     port: 587
-    authentication: plain
-    enableStarttlsAuto: true
+  reminders:
+    schedule: "0 8 * * *"
+    timeZone: Europe/Bratislava
 
 # PostgreSQL database configuration
 postgresql:
@@ -49,7 +45,6 @@ postgresql:
     database: spotreba_production
     username: spotreba
     password: ""
-    postgresPassword: ""
   
   storage:
     size: 10Gi
@@ -81,7 +76,7 @@ ingress:
 # Service configuration
 service:
   type: ClusterIP
-  port: 3000
+  port: 8080
 
 # WebEndpoint CRD configuration
 webEndpoint:
