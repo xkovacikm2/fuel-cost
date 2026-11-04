@@ -1,0 +1,17 @@
+{
+  "name": "spotreba-e2e",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "playwright test",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.64.1",
+    "@types/node": "^26.6.6",
+    "@types/pg": "^8.23.1",
+    "bcryptjs": "^3.0.3",
+    "pg": "^8.23.1",
+    "typescript": "^7.0.2"
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "name": "Spotreba – sledovanie paliva",
+  "short_name": "Spotreba",
+  "icons": [
+    {
+      "src": "/icon.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    },
+    {
+      "src": "/icon.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "maskable"
+    }
+  ],
+  "start_url": "/",
+  "display": "standalone",
+  "scope": "/",
+  "description": "Sledujte spotrebu paliva, náklady na 100 km a históriu tankovaní.",
+  "theme_color": "#0b3d91",
+  "background_color": "#f5f7fb"
+}

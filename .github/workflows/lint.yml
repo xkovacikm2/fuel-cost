@@ -11,26 +11,33 @@ permissions:
 jobs:
   lint:
     runs-on: ubuntu-latest
-    env:
-      RUBOCOP_CACHE_ROOT: tmp/rubocop
     steps:
       - name: Checkout code
         uses: actions/checkout@v7
 
-      - name: Set up Ruby
-        uses: ruby/setup-ruby@v1
+      - name: Set up Go
+        uses: actions/setup-go@v6
         with:
-          bundler-cache: true
+          go-version-file: server/go.mod
+          cache-dependency-path: server/go.sum
 
-      - name: Prepare RuboCop cache
-        uses: actions/cache@v6
-        env:
-          DEPENDENCIES_HASH: ${{ hashFiles('.ruby-version', '**/.rubocop.yml', '**/.rubocop_todo.yml', 'Gemfile.lock') }}
+      - name: Set up Node
+        uses: actions/setup-node@v4
         with:
-          path: ${{ env.RUBOCOP_CACHE_ROOT }}
-          key: rubocop-${{ runner.os }}-${{ env.DEPENDENCIES_HASH }}-${{ github.ref_name == github.event.repository.default_branch && github.run_id || 'default' }}
-          restore-keys: |
-            rubocop-${{ runner.os }}-${{ env.DEPENDENCIES_HASH }}-
+          node-version: 24
+          cache: npm
+          cache-dependency-path: web/package-lock.json
 
-      - name: Lint code for consistent style
-        run: bin/rubocop -f github
+      - name: Lint Go
+        working-directory: server
+        run: |
+          go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@latest
+          golangci-lint run ./...
+          go vet ./...
+
+      - name: Check frontend
+        working-directory: web
+        run: |
+          npm ci
+          npm run typecheck
+          npm test

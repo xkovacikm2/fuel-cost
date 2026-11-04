@@ -3,7 +3,7 @@
 [![Tests](https://github.com/xkovacikm2/fuel-cost/actions/workflows/test.yml/badge.svg?branch=main)](https://github.com/xkovacikm2/fuel-cost/actions/workflows/test.yml)
 [![Build](https://github.com/xkovacikm2/fuel-cost/actions/workflows/docker.yml/badge.svg?branch=main)](https://github.com/xkovacikm2/fuel-cost/actions/workflows/docker.yml)
 
-Spotreba is a Ruby on Rails 8 app for tracking fuel consumption and travel cost.
+Spotreba is a Go and Lit app for tracking fuel consumption and travel cost.
 
 Users can:
 - Register/login with email and password
@@ -24,13 +24,13 @@ Log in with:
 
 ## Tech Stack
 
-- Ruby 3.x
-- Rails 8.x
+- Go 1.27+
+- Lit and TypeScript
+- Vite
 - PostgreSQL 16
-- Hotwire (Turbo + Stimulus)
-- Chart.js via importmap
-- Propshaft asset pipeline
-- Solid Queue / Solid Cache / Solid Cable defaults
+- Chart.js
+- Goose SQL migrations
+- PostgreSQL-backed scheduled maintenance reminders
 
 ## Local Development (DevContainer)
 
@@ -39,22 +39,25 @@ The repository includes `.devcontainer` configuration with PostgreSQL.
 ### 1) Install dependencies
 
 ```bash
-bundle install
+cd server && go mod download
+cd ../web && npm ci
+cd ../e2e && npm ci && npx playwright install chromium
 ```
 
 ### 2) Set up database
 
 ```bash
-bin/rails db:create db:migrate
+cd server && DATABASE_URL=postgres://postgres:postgres@localhost:5432/spotreba_development go run ./cmd/spotreba migrate
 ```
 
-### 3) Start server
+### 3) Start API and frontend
 
 ```bash
-bin/rails server
+cd server && DATABASE_URL=postgres://postgres:postgres@localhost:5432/spotreba_development SECRET_KEY=replace-with-a-random-32-byte-secret go run ./cmd/spotreba serve
+cd web && npm run dev
 ```
 
-App runs at http://localhost:3000.
+The API runs at http://localhost:8080 and Vite runs at http://localhost:5173.
 
 ## Data Model
 
@@ -113,8 +116,9 @@ Mileage is an approximation based on the sum of refueling distances dated after
 the matching additional cost. A refueling recorded on the same date as the cost
 is not counted. The app does not record absolute odometer readings.
 
-The production scan runs every day at 08:00 in the `Europe/Bratislava` time zone.
-It uses Solid Queue and sends emails asynchronously.
+The production scan runs every day at 08:00 in the `Europe/Bratislava` time zone
+as a Kubernetes CronJob invoking `spotreba check-reminders`. Each notification is
+locked while sent; delivery is retried up to three times before it is marked failed.
 
 ### Production Mail Configuration
 
@@ -123,16 +127,18 @@ Set these environment variables in production:
 ```bash
 MAILER_FROM="Spotreba <notifications@example.com>"
 APP_HOST="spotreba.example.com"
+APP_TZ="Europe/Bratislava"
+ASSUME_SSL=true
+DATABASE_URL="postgres://spotreba:password@postgres:5432/spotreba_production?sslmode=disable"
+SECRET_KEY="a-random-secret-at-least-32-bytes-long"
 SMTP_ADDRESS="smtp.example.com"
 SMTP_PORT=587
 SMTP_USERNAME="smtp-user"
 SMTP_PASSWORD="smtp-password"
-SMTP_AUTHENTICATION="plain"
-SMTP_ENABLE_STARTTLS_AUTO=true
 ```
 
-Do not commit SMTP credentials. Without `SMTP_ADDRESS`, Rails keeps its default
-mail delivery settings and reminders cannot be sent externally.
+Do not commit SMTP credentials. `SMTP_ADDRESS` and `SMTP_PORT` enable reminder
+delivery; the app requires a configured SMTP sender when queued notifications exist.
 
 ## JSON Backup and Restore
 
@@ -215,8 +221,8 @@ never overwritten, and all imported data belongs to the signed-in user.
 ## PWA Installability
 
 This app includes:
-- Web app manifest at `/manifest.json`
-- Service worker at `/service-worker.js`
+- Web app manifest at `/manifest`
+- Service worker at `/service-worker`
 - Mobile-friendly responsive layout
 
 To install on smartphone:
@@ -226,9 +232,9 @@ To install on smartphone:
 ## Quality Commands
 
 ```bash
-bin/rails test
-bin/rubocop
-bin/brakeman
+cd server && MIGRATION_TEST_DATABASE_URL=postgres://postgres:postgres@localhost:5432/spotreba_go_e2e go test ./...
+cd web && npm run typecheck && npm test && npm run build
+cd e2e && npm test
 ```
 
 ## Notes

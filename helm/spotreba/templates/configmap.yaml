@@ -5,21 +5,15 @@ metadata:
   labels:
     {{- include "spotreba.labels" . | nindent 4 }}
 data:
-  RAILS_ENV: {{ .Values.rails.railsEnv | quote }}
-  RAILS_LOG_TO_STDOUT: "true"
-  RAILS_SERVE_STATIC_FILES: "true"
-  MAILER_FROM: {{ .Values.rails.mailerFrom | quote }}
-  HTTP_PORT: "3000"
-  RAILS_ASSUME_SSL: {{ .Values.rails.assumeSsl | quote }}
-  POSTGRES_HOST: {{ include "spotreba.postgresqlHost" . | quote }}
-  POSTGRES_PORT: "5432"
-  POSTGRES_DB: {{ .Values.postgresql.auth.database | quote }}
-  POSTGRES_USER: {{ .Values.postgresql.auth.username | quote }}
-  DATABASE_HOST: {{ include "spotreba.postgresqlHost" . | quote }}
-  {{- if .Values.rails.smtp.enabled }}
-  SMTP_USERNAME: {{ .Values.rails.smtp.username | quote }}
-  SMTP_ADDRESS: {{ required "rails.smtp.address is required when SMTP is enabled" .Values.rails.smtp.address | quote }}
-  SMTP_PORT: {{ .Values.rails.smtp.port | quote }}
-  SMTP_AUTHENTICATION: {{ .Values.rails.smtp.authentication | quote }}
-  SMTP_ENABLE_STARTTLS_AUTO: {{ .Values.rails.smtp.enableStarttlsAuto | quote }}
+  APP_ENV: production
+  PORT: {{ .Values.app.port | quote }}
+  APP_HOST: {{ .Values.app.host | quote }}
+  APP_TZ: {{ .Values.app.timeZone | quote }}
+  ASSUME_SSL: {{ .Values.app.assumeSsl | quote }}
+  TRUSTED_PROXY_CIDRS: {{ join "," .Values.app.trustedProxyCIDRs | quote }}
+  MAILER_FROM: {{ .Values.app.mailerFrom | quote }}
+  {{- if .Values.app.smtp.enabled }}
+  SMTP_ADDRESS: {{ required "app.smtp.address is required when SMTP is enabled" .Values.app.smtp.address | quote }}
+  SMTP_PORT: {{ .Values.app.smtp.port | quote }}
+  SMTP_USERNAME: {{ .Values.app.smtp.username | quote }}
   {{- end }}

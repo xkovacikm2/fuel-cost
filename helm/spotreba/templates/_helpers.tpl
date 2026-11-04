@@ -59,5 +59,5 @@ PostgreSQL host
 Database URL
 */}}
 {{- define "spotreba.databaseUrl" -}}
-{{- printf "postgresql://%s:$(SPOTREBA_DATABASE_PASSWORD)@%s:5432/%s" .Values.postgresql.auth.username (include "spotreba.postgresqlHost" .) .Values.postgresql.auth.database }}
+{{- printf "postgres://%s:$(POSTGRES_PASSWORD)@%s:5432/%s?sslmode=disable" .Values.postgresql.auth.username (include "spotreba.postgresqlHost" .) .Values.postgresql.auth.database }}
 {{- end }}

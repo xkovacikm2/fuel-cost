@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-Spotreba Fuel Tracker is a Ruby on Rails 8 application for tracking vehicle fuel usage and costs.
+Spotreba Fuel Tracker is a Go JSON API with a Lit/TypeScript frontend for tracking vehicle fuel usage and costs.
 
 The app supports:
 - Open registration and password-based login
@@ -14,40 +14,37 @@ The app supports:
 
 ## Technology Stack
 
-- Language: Ruby 3.x
-- Framework: Rails 8.x
+- Backend: Go 1.27+, standard-library HTTP server, pgx, Goose
+- Frontend: Lit, TypeScript, Vite, Chart.js
 - Database: PostgreSQL 16
-- Jobs/Queue: Active Job with Solid Queue
-- Assets: Propshaft + importmap-rails
-- Frontend: Hotwire (Turbo + Stimulus)
-- Charting: Chart.js (via importmap)
+- Jobs: Kubernetes CronJob invoking `spotreba check-reminders`
+- Assets: Vite build embedded in the Go binary
 - Development: DevContainer + Docker Compose
 
 ## Setup & Development Commands
 
 ```bash
 # Install dependencies
-bundle install
+cd server && go mod download
+cd ../web && npm ci
 
-# Set up database
-bin/rails db:create db:migrate
-
-# Start app
-bin/rails server
+# Apply schema and run the API
+cd ../server && DATABASE_URL=postgres://postgres:postgres@localhost:5432/spotreba_development go run ./cmd/spotreba migrate
+DATABASE_URL=postgres://postgres:postgres@localhost:5432/spotreba_development SECRET_KEY=<local-only-secret> go run ./cmd/spotreba serve
+cd ../web && npm run dev
 ```
 
 ## Testing, Lint, Security
 
 ```bash
 # Tests
-bin/rails test
+cd server && MIGRATION_TEST_DATABASE_URL=<isolated-postgres-url> go test ./...
+cd web && npm test && npm run typecheck
+cd e2e && npm test
 
-# Lint
-bin/rubocop
-
-# Security
-bin/brakeman
-bin/bundler-audit
+# Lint and security
+cd server && golangci-lint run ./... && govulncheck ./...
+cd web && npm audit
 ```
 
 ## Core Domain Models
@@ -75,21 +72,22 @@ Derived metrics:
 
 ## Code Conventions
 
-- Keep business logic in models and plain Ruby methods; keep controllers thin.
-- Always scope reads/writes by `Current.user`.
+- Keep business logic in Go domain/service packages; keep HTTP handlers thin.
+- Always scope reads/writes by the authenticated user ID.
 - Use `decimal` with precision/scale for measured values and money.
 - Prefer reversible migrations and explicit constraints (`null: false`, indexes).
-- Follow Omakase Rails style and keep RuboCop clean.
+- Keep `golangci-lint` clean and use decimal arithmetic for measured values.
 - Follow TDD's red-green-refactor workflow when implementing new features or bug fixes: write a failing test, make it pass, then refactor.
 
 ## Security Expectations
 
 - Never trust incoming IDs for ownership; verify associations belong to `Current.user`.
 - Never commit secrets.
-- Keep CSRF protections and secure session defaults enabled.
+- Keep CSRF protections, signed HttpOnly session cookies, and secure cookie defaults enabled.
 
 ## Pull Request Guidelines
 
-- Run `bin/rails test`, `bin/rubocop`, and `bin/brakeman` before requesting review.
+- Run Go tests, `golangci-lint`, `govulncheck`, frontend checks, and the Playwright parity suite before requesting review.
+- When explicitly asked to poll CI checks, continue checking at the requested interval using an available wait mechanism; merge only after all required checks pass.
 - Keep changes focused and avoid unrelated refactors.
 - Update tests for behavior changes.
