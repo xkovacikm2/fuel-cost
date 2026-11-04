@@ -28,6 +28,10 @@ jobs:
           cache: npm
           cache-dependency-path: web/package-lock.json
 
+      - name: Build embedded frontend
+        working-directory: web
+        run: npm ci && npm run build
+
       - name: Lint Go
         working-directory: server
         run: |
@@ -38,6 +42,5 @@ jobs:
       - name: Check frontend
         working-directory: web
         run: |
-          npm ci
           npm run typecheck
           npm test
