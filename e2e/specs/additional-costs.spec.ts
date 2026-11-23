@@ -1,5 +1,5 @@
 import { type Page } from "@playwright/test";
-import { count, createAdditionalCost, createVehicle, query } from "../support/db";
+import { count, createAdditionalCost, createVehicle, KINDS, query } from "../support/db";
 import { daysAgo, today } from "../support/dates";
 import { disableBrowserValidation, expect, newAccount, test } from "../support/fixtures";
 
@@ -10,6 +10,8 @@ const KIND_LABELS = [
   "Emisná kontrola",
   "Prezutie pneumatík",
   "Oprava",
+  "Poistenie",
+  "Servisná prehliadka",
   "Iné",
 ];
 
@@ -54,6 +56,25 @@ test.describe("additional costs", () => {
     );
     expect(rows).toEqual([{ on: daysAgo(4), kind: 2, comment: "STK Bratislava", cost: "85.50" }]);
   });
+
+  for (const { label, kind } of [
+    { label: "Poistenie", kind: "insurance" },
+    { label: "Servisná prehliadka", kind: "service_check" },
+  ] as const) {
+    test(`creates a ${label} cost and lists it on the dashboard`, async ({ page, signedIn }) => {
+      const id = await createVehicle(signedIn.id, "Fabia");
+      await page.goto("/additional_costs/new");
+      await page.getByLabel("Typ nákladu").selectOption({ label });
+      await page.getByLabel("Náklady").fill("199");
+      await page.getByRole("button", { name: "Uložiť" }).click();
+
+      await expect(page.getByText("Dodatočný náklad bol úspešne vytvorený.")).toBeVisible();
+      await expect(page.getByRole("cell", { name: label })).toBeVisible();
+      expect(await query("SELECT kind FROM additional_costs WHERE vehicle_id = $1", [id])).toEqual([
+        { kind: KINDS[kind] },
+      ]);
+    });
+  }
 
   test("stores a blank comment as empty", async ({ page, signedIn }) => {
     const id = await createVehicle(signedIn.id, "Fabia");

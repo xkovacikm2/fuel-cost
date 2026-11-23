@@ -6,8 +6,10 @@
 	--primary: #0b3d91;
 	--primary-soft: #e8efff;
 	--danger: #a0002b;
+	--danger-soft: #fde9ef;
 	--ok: #0f7a43;
 	--border: #d9e0ec;
+	--control-size: 2.5rem;
 }
 
 * {
@@ -86,19 +88,20 @@ a:hover {
 	display: none;
 	align-items: center;
 	justify-content: center;
-	width: 2.25rem;
-	height: 2.25rem;
+	width: var(--control-size);
+	height: var(--control-size);
 	padding: 0;
 	background: transparent;
 	color: var(--primary);
 }
 
-.nav-expand {
-	display: none;
-}
-
 .user-menu {
 	position: relative;
+}
+
+/* An inline button would sit in a line box taller than itself and end up higher than the other links. */
+.user-menu > .nav-link {
+	display: flex;
 }
 
 .user-menu-panel {
@@ -138,6 +141,8 @@ a:hover {
 }
 
 .link-button {
+	min-height: 0;
+	justify-content: flex-start;
 	border: 0;
 	padding: 0;
 	margin: 0;
@@ -145,6 +150,13 @@ a:hover {
 	color: var(--primary);
 	font: inherit;
 	cursor: pointer;
+}
+
+/* Components and pages are wrappers around their content and take part in the layout of their parent. */
+spotreba-header,
+spotreba-fuel-chart,
+.route-view {
+	display: contents;
 }
 
 .page {
@@ -190,11 +202,16 @@ label {
 input,
 select {
 	width: 100%;
-	padding: 0.6rem 0.7rem;
+	height: var(--control-size);
+	padding: 0 0.7rem;
 	border: 1px solid var(--border);
 	border-radius: 8px;
 	background: #fff;
 	font: inherit;
+}
+
+input[type="checkbox"] {
+	height: auto;
 }
 
 .input-with-unit {
@@ -205,8 +222,13 @@ select {
 
 .actions {
 	display: flex;
+	align-items: center;
 	gap: 0.6rem;
 	flex-wrap: wrap;
+}
+
+.field.actions {
+	align-items: flex-end;
 }
 
 .section-heading {
@@ -253,68 +275,48 @@ select {
 	border-bottom: 0;
 }
 
+/* Every control is --control-size high; icon-only controls are squares of that size. */
 button,
 input[type="submit"],
-.button {
-	border: 0;
-	border-radius: 8px;
-	background: var(--primary);
-	color: #fff;
-	padding: 0.6rem 0.85rem;
-	cursor: pointer;
-	font: inherit;
-}
-
-.button.secondary,
-button.secondary {
-	background: var(--primary-soft);
-	color: var(--primary);
-}
-
-.button.danger,
-button.danger {
-	background: #fde9ef;
-	color: var(--danger);
-}
-
 .icon-button {
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
-	width: 1.9rem;
-	height: 1.9rem;
-	padding: 0;
+	flex: none;
+	gap: 0.5rem;
+	min-height: var(--control-size);
+	padding: 0 1rem;
 	border: 0;
-	border-radius: 0.55rem;
-	background: var(--primary-soft);
-	color: var(--primary);
+	border-radius: 8px;
+	background: var(--primary);
+	color: #fff;
+	font: inherit;
+	line-height: 1.2;
+	text-align: center;
 	text-decoration: none;
 	cursor: pointer;
-	line-height: 0;
+}
+
+.icon-button {
+	width: var(--control-size);
+	padding: 0;
+	background: var(--primary-soft);
+	color: var(--primary);
 }
 
 .icon-button.danger {
-	background: #fde9ef;
+	background: var(--danger-soft);
 	color: var(--danger);
 }
 
-.icon-button svg,
-.icon-button img {
-	width: 0.85rem;
-	height: 0.85rem;
-	display: block;
-}
-
-.sr-only {
-	position: absolute;
-	width: 1px;
-	height: 1px;
-	padding: 0;
-	margin: -1px;
-	overflow: hidden;
-	clip: rect(0, 0, 0, 0);
-	white-space: nowrap;
-	border: 0;
+/* The glyph is a mask over currentColor, so it follows the colour of the control it is in. */
+.icon {
+	flex: none;
+	width: 1.25rem;
+	height: 1.25rem;
+	background-color: currentColor;
+	-webkit-mask: var(--icon) center / contain no-repeat;
+	mask: var(--icon) center / contain no-repeat;
 }
 
 .flash {
@@ -428,34 +430,6 @@ td {
 		overflow-y: auto;
 	}
 
-	.nav-expand {
-		display: inline-flex;
-		align-items: center;
-		gap: 0.4rem;
-		min-height: 2.25rem;
-		padding: 0.55rem;
-		border: 0;
-		border-radius: 6px;
-		background: transparent;
-		color: var(--primary);
-		font: inherit;
-		white-space: nowrap;
-		cursor: pointer;
-	}
-
-	.nav-expand img {
-		width: 1rem;
-		height: 1rem;
-	}
-
-	.nav-expand span {
-		display: none;
-	}
-
-	.main-nav.is-expanded .nav-expand span {
-		display: inline;
-	}
-
 	.main-nav .nav-link {
 		min-height: 2.25rem;
 		padding: 0.55rem;
@@ -543,5 +517,10 @@ td {
 
 	td:last-child {
 		border-bottom: 0;
+	}
+
+	td:has(> .actions)::before {
+		top: 50%;
+		transform: translateY(-50%);
 	}
 }

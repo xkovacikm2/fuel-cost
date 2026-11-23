@@ -94,6 +94,22 @@ test.describe("maintenance reminder job", () => {
       await createAdditionalCost(v, { on: daysAgo(340), kind: "emissions_inspection", cost: 50 });
     }
 
+    users.insurance = await newAccount("insurance");
+    {
+      const v = await createVehicle(users.insurance.id, "Rapid");
+      const rule = await createRule(v, { kind: "insurance", intervalDays: 365 });
+      await createLead(rule, { daysBefore: 30 });
+      await createAdditionalCost(v, { on: daysAgo(340), kind: "insurance", cost: 300 });
+    }
+
+    users.serviceCheck = await newAccount("service-check");
+    {
+      const v = await createVehicle(users.serviceCheck.id, "Karoq");
+      const rule = await createRule(v, { kind: "service_check", intervalDays: 365 });
+      await createLead(rule, { daysBefore: 30 });
+      await createAdditionalCost(v, { on: daysAgo(340), kind: "service_check", cost: 90 });
+    }
+
     await runReminders();
   });
 
@@ -164,10 +180,18 @@ test.describe("maintenance reminder job", () => {
     expect(await messageText(mail.ID)).toContain(`Posledný zaznamenaný náklad bol ${daysAgo(340)}.`);
   });
 
+  test("names insurance and service check reminders in Slovak", async () => {
+    const [insurance] = await waitForMessages(users.insurance.email, 1);
+    expect(insurance.Subject).toBe("Blíži sa údržba vozidla: Poistenie");
+    const [serviceCheck] = await waitForMessages(users.serviceCheck.email, 1);
+    expect(serviceCheck.Subject).toBe("Blíži sa údržba vozidla: Servisná prehliadka");
+    expect(await messageText(serviceCheck.ID)).toContain("Blíži sa údržba Servisná prehliadka pre vozidlo Karoq.");
+  });
+
   test("does not notify twice on the next run", async () => {
     await runReminders();
     await new Promise((r) => setTimeout(r, 1_000));
-    for (const key of ["advance", "urgent", "mileage", "cycle"]) {
+    for (const key of ["advance", "urgent", "mileage", "cycle", "insurance", "serviceCheck"]) {
       expect(await messagesFor(users[key].email), key).toHaveLength(1);
     }
     expect(await notifications(users.advance.id)).toHaveLength(1);

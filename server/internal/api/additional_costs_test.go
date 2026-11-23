@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"slices"
 	"strings"
 	"testing"
 	"time"
@@ -122,5 +123,90 @@ func TestAdditionalCostCRUDValidatesAndScopesVehicleOwnership(t *testing.T) {
 	}
 	if count != 0 {
 		t.Fatalf("cost rows after delete = %d, want 0", count)
+	}
+}
+
+func TestAdditionalCostStoresInsuranceAndServiceCheckKinds(t *testing.T) {
+	handler, db := newTestHandler(t)
+	cookie := registerTestUser(t, handler, "cost-new-kinds@example.com")
+	var vehicleID int64
+	if err := db.QueryRow(`INSERT INTO vehicles (user_id,name,fuel_type,created_at,updated_at)
+		SELECT id,'Kind car',0,now(),now() FROM users WHERE email_address='cost-new-kinds@example.com' RETURNING id`).Scan(&vehicleID); err != nil {
+		t.Fatal(err)
+	}
+
+	for _, tc := range []struct {
+		kind, label string
+		stored      int
+	}{
+		{"insurance", "Poistenie", 7},
+		{"service_check", "Servisná prehliadka", 8},
+	} {
+		t.Run(tc.kind, func(t *testing.T) {
+			created := apiRequest(handler, http.MethodPost, "/api/additional_costs", fmt.Sprintf(
+				`{"vehicle_id":%d,"occurred_on":"2026-03-01","kind":%q,"cost":"120.00"}`, vehicleID, tc.kind,
+			), cookie)
+			if created.Code != http.StatusCreated {
+				t.Fatalf("create status = %d: %s", created.Code, created.Body)
+			}
+			var body struct {
+				AdditionalCost struct {
+					ID        int64  `json:"id"`
+					Kind      string `json:"kind"`
+					KindLabel string `json:"kind_label"`
+				} `json:"additional_cost"`
+			}
+			if err := json.Unmarshal(created.Body.Bytes(), &body); err != nil {
+				t.Fatal(err)
+			}
+			if body.AdditionalCost.Kind != tc.kind || body.AdditionalCost.KindLabel != tc.label {
+				t.Fatalf("created cost = %+v, want kind %q labelled %q", body.AdditionalCost, tc.kind, tc.label)
+			}
+			var stored int
+			if err := db.QueryRow("SELECT kind FROM additional_costs WHERE id = $1", body.AdditionalCost.ID).Scan(&stored); err != nil {
+				t.Fatal(err)
+			}
+			if stored != tc.stored {
+				t.Fatalf("stored kind = %d, want %d", stored, tc.stored)
+			}
+		})
+	}
+}
+
+func TestCostKindOptionsListNewKindsBeforeOther(t *testing.T) {
+	handler, _ := newTestHandler(t)
+	cookie := registerTestUser(t, handler, "cost-kind-options@example.com")
+	type option struct {
+		Value string `json:"value"`
+		Label string `json:"label"`
+	}
+	want := []option{
+		{"oil_change", "Výmena oleja"},
+		{"fuel_filter_change", "Výmena palivového filtra"},
+		{"technical_inspection", "Technická kontrola"},
+		{"emissions_inspection", "Emisná kontrola"},
+		{"tire_change", "Prezutie pneumatík"},
+		{"repair", "Oprava"},
+		{"insurance", "Poistenie"},
+		{"service_check", "Servisná prehliadka"},
+		{"other", "Iné"},
+	}
+
+	for _, path := range []string{"/api/additional_costs/new", "/api/maintenance_reminders/new"} {
+		t.Run(path, func(t *testing.T) {
+			response := apiRequest(handler, http.MethodGet, path, "", cookie)
+			if response.Code != http.StatusOK {
+				t.Fatalf("status = %d: %s", response.Code, response.Body)
+			}
+			var body struct {
+				Kinds []option `json:"kinds"`
+			}
+			if err := json.Unmarshal(response.Body.Bytes(), &body); err != nil {
+				t.Fatal(err)
+			}
+			if !slices.Equal(body.Kinds, want) {
+				t.Fatalf("kinds = %+v, want %+v", body.Kinds, want)
+			}
+		})
 	}
 }

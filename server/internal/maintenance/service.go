@@ -70,7 +70,7 @@ func evaluateRule(ctx context.Context, database *sql.DB, ruleID int64, today tim
 	if err != nil {
 		return nil, err
 	}
-	if kind < 0 || kind >= 7 {
+	if kind < 0 || kind >= len(reminderKindLabels) {
 		return nil, fmt.Errorf("maintenance reminder %d has invalid kind %d", ruleID, kind)
 	}
 
