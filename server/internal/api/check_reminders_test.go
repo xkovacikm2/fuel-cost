@@ -139,6 +139,41 @@ func TestReminderCheckAndDeliverSendsOnceAndMarksNotificationSent(t *testing.T) 
 	}
 }
 
+func TestReminderEmailNamesInsuranceAndServiceCheck(t *testing.T) {
+	for _, tc := range []struct{ kind, label string }{
+		{"insurance", "Poistenie"},
+		{"service_check", "Servisná prehliadka"},
+	} {
+		t.Run(tc.kind, func(t *testing.T) {
+			if _, ok := costKinds[tc.kind]; !ok {
+				t.Fatalf("cost kind %q is not defined", tc.kind)
+			}
+			_, db := newTestServer(t)
+			today := dateAtUTC(time.Now())
+			userID := insertTestUser(t, db, "reminders-"+tc.kind+"@example.com")
+			vehicleID := insertTestVehicle(t, db, userID, "Kind car")
+			ruleID := insertTestReminderRule(t, db, vehicleID, 365, "15000", true, tc.kind)
+			insertTestReminderLead(t, db, ruleID, intPointer(30), nil)
+			insertTestCost(t, db, vehicleID, today.AddDate(0, 0, -336), tc.kind)
+			mailer := &recordingMailer{}
+
+			if _, err := maintenance.CheckAndDeliver(context.Background(), db, today, mailer); err != nil {
+				t.Fatal(err)
+			}
+			if len(mailer.messages) != 1 {
+				t.Fatalf("messages = %+v, want one", mailer.messages)
+			}
+			message := mailer.messages[0]
+			if want := "Blíži sa údržba vozidla: " + tc.label; message.subject != want {
+				t.Fatalf("subject = %q, want %q", message.subject, want)
+			}
+			if want := "Blíži sa údržba " + tc.label + " pre vozidlo Kind car."; !strings.Contains(message.body, want) {
+				t.Fatalf("body = %q, want it to contain %q", message.body, want)
+			}
+		})
+	}
+}
+
 type failingReminderMailer struct{ calls int }
 
 func (m *failingReminderMailer) Send(string, string, string) error {

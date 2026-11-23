@@ -14,6 +14,8 @@ export const KINDS = {
   tire_change: 4,
   repair: 5,
   other: 6,
+  insurance: 7,
+  service_check: 8,
 } as const;
 export const NOTIFICATION_KINDS = { advance: 0, due: 1 } as const;
 export const NOTIFICATION_STATUSES = { queued: 0, sent: 1, skipped: 2, failed: 3 } as const;

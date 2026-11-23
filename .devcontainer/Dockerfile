@@ -7,6 +7,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates \
     curl \
     git \
+    openssh-client \
     postgresql-client \
     xz-utils \
     && curl -fsSL "https://go.dev/dl/go${GO_VERSION}.linux-amd64.tar.gz" | tar -C /usr/local -xz \
@@ -18,7 +19,7 @@ ENV PATH="/usr/local/go/bin:/usr/local/bin:/home/vscode/go/bin:${PATH}" \
 
 RUN npx -y playwright@1 install-deps chromium && rm -rf /var/lib/apt/lists/*
 
-RUN useradd -m -s /bin/bash vscode && mkdir -p /workspace && chown -R vscode:vscode /workspace /home/vscode/go
+RUN useradd -m -s /bin/bash vscode && mkdir -p /workspace /home/vscode/go && chown -R vscode:vscode /workspace /home/vscode/go
 
 USER vscode
 WORKDIR /workspace

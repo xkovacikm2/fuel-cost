@@ -20,10 +20,19 @@ var costKinds = map[string]int{
 	"tire_change":          4,
 	"repair":               5,
 	"other":                6,
+	"insurance":            7,
+	"service_check":        8,
 }
 
 var costKindNames = []string{
 	"oil_change", "fuel_filter_change", "technical_inspection", "emissions_inspection", "tire_change", "repair", "other",
+	"insurance", "service_check",
+}
+
+// costKindFormOrder is the order kinds are offered in forms; stored ids stay stable, so "other" is listed last here.
+var costKindFormOrder = []string{
+	"oil_change", "fuel_filter_change", "technical_inspection", "emissions_inspection", "tire_change", "repair",
+	"insurance", "service_check", "other",
 }
 
 type additionalCostInput struct {
@@ -286,9 +295,9 @@ func positiveCost(raw string) (decimal.Decimal, error) {
 }
 
 func costKindOptions() []map[string]string {
-	options := make([]map[string]string, 0, len(costKindNames))
-	for index, kind := range costKindNames {
-		options = append(options, map[string]string{"value": kind, "label": costKindLabel(index)})
+	options := make([]map[string]string, 0, len(costKindFormOrder))
+	for _, kind := range costKindFormOrder {
+		options = append(options, map[string]string{"value": kind, "label": costKindLabel(costKinds[kind])})
 	}
 	return options
 }
@@ -296,6 +305,7 @@ func costKindOptions() []map[string]string {
 func costKindLabel(kind int) string {
 	labels := []string{
 		"Výmena oleja", "Výmena palivového filtra", "Technická kontrola", "Emisná kontrola", "Prezutie pneumatík", "Oprava", "Iné",
+		"Poistenie", "Servisná prehliadka",
 	}
 	if kind < 0 || kind >= len(labels) {
 		return ""

@@ -2,11 +2,26 @@ version: '3.8'
 
 services:
   app:
+    image: localhost/spotreba_devcontainer-app:latest
     build:
       context: ..
       dockerfile: .devcontainer/Dockerfile
+    # Rootless Podman: map host UID/GID to the container's vscode user so the bind-mounted workspace is writable.
+    userns_mode: keep-id
     volumes:
       - ../:/workspace/spotreba:cached
+      - type: bind
+        source: ~/.ssh
+        target: /home/vscode/.ssh
+        read_only: true
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ~/.gitconfig
+        target: /home/vscode/.gitconfig-copy
+        read_only: true
+        bind:
+          create_host_path: false
     command: sleep infinity
     environment:
       APP_ENV: development

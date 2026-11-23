@@ -148,10 +148,14 @@ func deliverAttempt(ctx context.Context, database *sql.DB, notificationID int64,
 	return true, nil
 }
 
+var reminderKindLabels = []string{
+	"Výmena oleja", "Výmena palivového filtra", "Technická kontrola", "Emisná kontrola", "Prezutie pneumatík", "Oprava", "Iné",
+	"Poistenie", "Servisná prehliadka",
+}
+
 func reminderKindLabel(kind int) string {
-	labels := []string{"Výmena oleja", "Výmena palivového filtra", "Technická kontrola", "Emisná kontrola", "Prezutie pneumatík", "Oprava", "Iné"}
-	if kind < 0 || kind >= len(labels) {
+	if kind < 0 || kind >= len(reminderKindLabels) {
 		return ""
 	}
-	return labels[kind]
+	return reminderKindLabels[kind]
 }

@@ -36,6 +36,11 @@ Log in with:
 
 The repository includes `.devcontainer` configuration with PostgreSQL.
 
+Before opening the container, make sure your host `~/.ssh` directory and `~/.gitconfig` file exist.
+Compose mounts `~/.ssh` read-only at `/home/vscode/.ssh`; manage key permissions and trusted hosts
+on the host. The container gets a writable copy of your Git config so container-specific settings
+do not change the host file. Rebuild the dev container to apply mount or image changes.
+
 ### 1) Install dependencies
 
 ```bash
@@ -231,10 +236,54 @@ To install on smartphone:
 
 ## Quality Commands
 
+The dev container includes [Task](https://taskfile.dev/); rebuild the container
+after changing its features. Outside the container, install Task v3 and the
+dependencies listed above.
+
+Run from the repository root:
+
 ```bash
-cd server && MIGRATION_TEST_DATABASE_URL=postgres://postgres:postgres@localhost:5432/spotreba_go_e2e go test ./...
-cd web && npm run typecheck && npm test && npm run build
-cd e2e && npm test
+task --list
+task test:go        # Go backend and PostgreSQL migration tests
+task test:frontend  # Frontend unit tests
+task test:e2e       # Browser tests with an automatically managed test server
+task test          # Full suite, sequentially (alias: task test:all)
+```
+
+Go and E2E tasks build the embedded frontend first (once per full-suite run).
+PostgreSQL must be running with an existing test database. `MIGRATION_TEST_DATABASE_URL`
+is supplied by the dev container; outside it, Task defaults to
+`postgres://postgres:postgres@localhost:5432/spotreba_go_e2e?sslmode=disable`.
+`E2E_DATABASE_URL` can override the browser-test database and otherwise uses the
+same URL.
+
+The E2E task applies migrations, starts its own API at `http://127.0.0.1:8081`,
+waits for readiness, and stops the API afterward, including on test failure.
+Override `BASE_URL` to use another local HTTP port. It will not reuse an existing
+server. E2E databases must have names ending in `_e2e`; browser setup clears
+their application tables and the Mailpit inbox. Use dedicated test services.
+Mailpit must be running; the dev container supplies `MAILPIT_URL`, `SMTP_ADDRESS`,
+and `SMTP_PORT`. Outside it, the defaults are `http://127.0.0.1:8025` and SMTP port
+`1025`.
+
+Pass runner-specific arguments after `--` on individual tasks:
+
+```bash
+task test:go -- -count=1
+task test:frontend -- --reporter=verbose
+task test:e2e -- --grep "login"
+```
+
+Running `npm test` directly in `e2e` still expects an already-running API
+(`BASE_URL`, default `http://localhost:8080`); automatic startup is opt-in via
+`E2E_START_SERVER=1`, which the Taskfile sets.
+
+Additional type checks and a standalone frontend build:
+
+```bash
+npm --prefix web run typecheck
+npm --prefix e2e run typecheck
+npm --prefix web run build
 ```
 
 ## Notes
