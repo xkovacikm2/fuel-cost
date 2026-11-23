@@ -3,6 +3,19 @@
     "github": {
       "type": "http",
       "url": "https://api.githubcopilot.com/mcp/"
-    }
+    },
+    "serena": {
+      "type": "stdio",
+      "command": "uvx",
+      "args": [
+        "--from",
+        "git+https://github.com/oraios/serena",
+        "serena",
+        "start-mcp-server",
+        "--context=vscode",
+        "--project",
+        "${workspaceFolder}"
+      ]
+    },
   }
 }

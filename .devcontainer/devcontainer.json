@@ -3,6 +3,9 @@
   "dockerComposeFile": "docker-compose.yml",
   "service": "app",
   "workspaceFolder": "/workspace/spotreba",
+  "features": {
+    "ghcr.io/devcontainers-extra/features/go-task:1": {}
+  },
   "customizations": {
     "vscode": {
       "extensions": [
@@ -12,7 +15,8 @@
         "runem.lit-plugin",
         "ms-playwright.playwright",
         "ms-azuretools.vscode-containers",
-        "cweijan.vscode-database-client2"
+        "cweijan.vscode-database-client2",
+        "task.vscode-task"
       ],
       "mcp": {
         "servers": {
