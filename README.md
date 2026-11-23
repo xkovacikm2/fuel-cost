@@ -36,6 +36,11 @@ Log in with:
 
 The repository includes `.devcontainer` configuration with PostgreSQL.
 
+Before opening the container, make sure your host `~/.ssh` directory and `~/.gitconfig` file exist.
+Compose mounts `~/.ssh` read-only at `/home/vscode/.ssh`; manage key permissions and trusted hosts
+on the host. The container gets a writable copy of your Git config so container-specific settings
+do not change the host file. Rebuild the dev container to apply mount or image changes.
+
 ### 1) Install dependencies
 
 ```bash

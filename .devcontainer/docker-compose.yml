@@ -7,6 +7,18 @@ services:
       dockerfile: .devcontainer/Dockerfile
     volumes:
       - ../:/workspace/spotreba:cached
+      - type: bind
+        source: ${HOME:-${USERPROFILE:?Set HOME or USERPROFILE}}/.ssh
+        target: /home/vscode/.ssh
+        read_only: true
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ${HOME:-${USERPROFILE:?Set HOME or USERPROFILE}}/.gitconfig
+        target: /home/vscode/.gitconfig-copy
+        read_only: true
+        bind:
+          create_host_path: false
     command: sleep infinity
     environment:
       APP_ENV: development
